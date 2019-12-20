@@ -41,14 +41,19 @@ import java.util.logging.Level;
 import org.adempiere.exceptions.AdempiereException;
 import org.apache.commons.io.FileUtils;
 import org.compiere.model.MBPartner;
+import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
+import org.compiere.model.MInventory;
 import org.compiere.model.MInvoice;
 import org.compiere.model.MMailText;
 import org.compiere.model.MMovement;
 import org.compiere.model.MOrgInfo;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
+import org.compiere.model.PrintInfo;
 import org.compiere.model.Query;
+import org.compiere.print.MPrintFormat;
+import org.compiere.print.ReportEngine;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.AdempiereUserError;
@@ -392,6 +397,7 @@ public class SRIEmailAuthorization extends SvrProcess
 			c_invoice_id = LEC_FE_Utils.getAuthorisedInvoicePL(authorization.getSRI_Authorization_ID());
 			
 			MInvoice invoice = new MInvoice (getCtx(), c_invoice_id, get_TrxName());
+			MDocType dt = new MDocType(getCtx(), invoice.getC_DocType_ID(), get_TrxName());
 			
 			// Formato
 			m_lec_sri_format_id = LEC_FE_Utils.getLecSriFormat(getAD_Client_ID(), signature.getDeliveredType(), authorization.getSRI_ShortDocType(), invoice.getDateInvoiced(), invoice.getDateInvoiced());
@@ -415,7 +421,18 @@ public class SRIEmailAuthorization extends SvrProcess
 				List<File> atts = new ArrayList<File>();
 				File attachment = (new File (file_name));
 				atts.add(attachment);
-				File invpdf = invoice.createPDF();
+				//TODO Cambiar a Generar PDF Liquidación de Compras
+				
+				//Engine
+				PrintInfo info = new PrintInfo("email",MInvoice.Table_ID, invoice.getC_Invoice_ID());
+				
+				ReportEngine re = null;
+				MPrintFormat format = new MPrintFormat(getCtx(), dt.get_ValueAsInt("PL_PrintFormat_ID") , get_TrxName());
+				
+				if (format != null)
+					re = new ReportEngine(getCtx(), format, null, info);
+				
+				File invpdf = re.getPDF(File.createTempFile("Liquidacion"+invoice.getDocumentNo(), ".pdf"));				
 				atts.add(invpdf);
 				
 				if (attachment.exists() || attachment.isFile() || attachment.canRead()) {
