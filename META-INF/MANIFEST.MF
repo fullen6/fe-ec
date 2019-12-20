@@ -12,14 +12,10 @@ Require-Bundle: org.adempiere.base;bundle-version="1.0.0",
  org.adempiere.ui.zk;bundle-version="1.0.0",
  org.globalqss.idempiere.LCO.withholdings;bundle-version="2.1.1",
  org.globalqss.idempiere.LCO.detailednames;bundle-version="2.1.0",
- org.adempiere.base.callout;bundle-version="2.1.0",
- javax.jws;bundle-version="2.0.0"
+ org.adempiere.base.callout;bundle-version="2.1.0"
 Service-Component: OSGI-INF/LEC_FE_ModelFactory.xml,OSGI-INF/LEC_FE_ModelValidator.xml,OSGI-INF/LEC_FE_ProcessFactory.xml,
  OSGI-INF/LEC_FE_CalloutFactory.xml
-Import-Package: javax.xml.bind,
- javax.xml.bind.annotation,
- javax.xml.ws,
- org.apache.commons.io;version="2.2.0",
+Import-Package: org.apache.commons.io;version="2.2.0",
  org.compiere.server,
  org.osgi.service.event
 Bundle-ClassPath: lib/bcmail-jdk16-1.45.jar,

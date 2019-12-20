@@ -421,7 +421,8 @@ public class SRIEmailAuthorization extends SvrProcess
 				List<File> atts = new ArrayList<File>();
 				File attachment = (new File (file_name));
 				atts.add(attachment);
-								
+				//TODO Cambiar a Generar PDF Liquidación de Compras
+				
 				//Engine
 				PrintInfo info = new PrintInfo("email",MInvoice.Table_ID, invoice.getC_Invoice_ID());
 				
