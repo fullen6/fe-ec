@@ -44,7 +44,6 @@ import ec.gob.sri.comprobantes.ws.aut.RespuestaComprobante;
 import ec.gob.sri.comprobantes.ws.aut.RespuestaComprobante.Autorizaciones;
 import es.mityc.firmaJava.libreria.ConstantesXADES;
 import es.mityc.firmaJava.libreria.xades.DataToSign;
-import es.mityc.firmaJava.libreria.xades.DataToSign.XADES_X_TYPES;
 import es.mityc.firmaJava.libreria.xades.XAdESSchemas;
 import es.mityc.javasign.EnumFormatoFirma;
 import es.mityc.javasign.xml.refs.AllXMLToSign;

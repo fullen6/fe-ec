@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import javax.swing.text.html.parser.DTD;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.sax.SAXTransformerFactory;
