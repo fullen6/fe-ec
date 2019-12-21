@@ -88,6 +88,7 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 	protected String doIt() throws Exception {
 
 		String msg = "";
+		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 
 		for (String table : m_tables) {
 			log.info("Processing " + table);

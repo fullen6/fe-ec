@@ -5,6 +5,7 @@
 	<classpathentry kind="lib" path="lib/cliente-sri-offline-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/FacturacionElectronica-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/cliente-ws-offline-cliente-ws-offline.jar"/>
+	<classpathentry kind="lib" path="lib/org.apache.karaf.specs.java.xml.ws-4.2.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
