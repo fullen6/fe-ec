@@ -64,6 +64,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 	private BigDecimal m_sumadescuento = Env.ZERO;
 	private BigDecimal m_sumabaseimponible = Env.ZERO;
 	private BigDecimal m_sumavalorimpuesto = Env.ZERO;
+	private BigDecimal m_withholdingamt = Env.ZERO;
 
 	// 04/07/2016 MHG Offline Schema added
 	private boolean isOfflineSchema = false;
@@ -154,7 +155,11 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 					getC_Invoice_ID());
 
 			if (m_totaldescuento == null)
-				m_totaldescuento = Env.ZERO;
+				m_totaldescuento = Env.ZERO;			
+			
+			m_withholdingamt = (new BigDecimal(get_ValueAsString("WithholdingAmt")));
+			if (m_withholdingamt == null)
+				m_withholdingamt = Env.ZERO;
 
 			//
 			int sri_accesscode_id = 0;
@@ -353,7 +358,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			mmDoc.endElement("", "", "totalConImpuestos");
 
 			// Numerico Max 14
-			addHeaderElement(mmDoc, "importeTotal", getGrandTotal().toString(), atts);
+			addHeaderElement(mmDoc, "importeTotal", getGrandTotal().add(m_withholdingamt).toString(), atts);
 			// Alfanumerico MAx 25
 			addHeaderElement(mmDoc, "moneda", getCurrencyISO(), atts);
 
@@ -371,7 +376,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 				MPaymentTerm paymentTerm = (MPaymentTerm) getC_PaymentTerm();
 				mmDoc.startElement("", "", "pago", atts);
 				addHeaderElement(mmDoc, "formaPago", invoice.get_ValueAsString("LEC_PaymentMethod"), atts);
-				addHeaderElement(mmDoc, "total", getGrandTotal().toString(), atts);
+				addHeaderElement(mmDoc, "total", getGrandTotal().add(m_withholdingamt).toString(), atts);
 				addHeaderElement(mmDoc, "plazo", String.valueOf(paymentTerm.getNetDays()), atts);
 				addHeaderElement(mmDoc, "unidadTiempo", "dias", atts);
 				mmDoc.endElement("", "", "pago");
@@ -381,7 +386,6 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 				for (int i = 0; i < rows; i++)
 
 				{
-
 					mmDoc.startElement("", "", "pago", atts);
 					addHeaderElement(mmDoc, "formaPago", ipss[i].get_ValueAsString("LEC_PaymentMethod"), atts);
 					addHeaderElement(mmDoc, "total", LEC_FE_Utils.cutString(ipss[i].getDueAmt().toString(), 14), atts);
@@ -735,7 +739,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 				LEC_FE_MRetencion.generateWitholdingNo(lecfeinvret);
 				msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
 			}
-		}else
+		} else
 			set_Value("SRI_Authorization_ID", a.get_ID());
 
 		this.saveEx();
