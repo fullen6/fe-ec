@@ -24,67 +24,67 @@ public class LEC_FE_ProcessFactory implements IProcessFactory {
 		ProcessCall process = null;
 		if ("org.globalqss.process.SRIContingencyGenerate".equals(className)) {
 			try {
-				process =  SRIContingencyGenerate.class.newInstance();
+				process =  SRIContingencyGenerate.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIEmailAuthorization".equals(className)) {
 			try {
-				process =  SRIEmailAuthorization.class.newInstance();
+				process =  SRIEmailAuthorization.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIReprocessAuthorization".equals(className)) {
 			try {
-				process =  SRIReprocessAuthorization.class.newInstance();
+				process =  SRIReprocessAuthorization.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIGenerateWithholding".equals(className)) {
 			try {
-				process =  SRIGenerateWithholding.class.newInstance();
+				process =  SRIGenerateWithholding.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIProcessBatchWithholdings".equals(className)) {
 			try {
-				process =  SRIProcessBatchWithholdings.class.newInstance();
+				process =  SRIProcessBatchWithholdings.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIProcessBatchSalesOrders".equals(className)) {
 			try {
-				process =  SRIProcessBatchSalesOrders.class.newInstance();
+				process =  SRIProcessBatchSalesOrders.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIProcessBatchSalesInvoices".equals(className)) {
 			try {
-				process =  SRIProcessBatchSalesInvoices.class.newInstance();
+				process =  SRIProcessBatchSalesInvoices.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIProcessBatchMovements".equals(className)) {
 			try {
-				process =  SRIProcessBatchMovements.class.newInstance();
+				process =  SRIProcessBatchMovements.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if ("org.globalqss.process.SRIProcessBatchInOuts".equals(className)) {
 			try {
-				process =  SRIProcessBatchInOuts.class.newInstance();
+				process =  SRIProcessBatchInOuts.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if (LEC_InvoiceGenerate.class.getCanonicalName().equals(className)) {
 			try {
-				process =  LEC_InvoiceGenerate.class.newInstance();
+				process =  LEC_InvoiceGenerate.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if (SRIProcessOfflineAuthorizations.class.getCanonicalName().equals(className)) {
 			try {
-				process =  SRIProcessOfflineAuthorizations.class.newInstance();
+				process =  SRIProcessOfflineAuthorizations.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if (SRIGenerateOfflineAuthorizations.class.getCanonicalName().equals(className)) {
 			try {
-				process =  SRIGenerateOfflineAuthorizations.class.newInstance();
+				process =  SRIGenerateOfflineAuthorizations.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		else if (SRIGeneateOffLineAutForDocument.class.getCanonicalName().equals(className)) {
 			try {
-				process = SRIGeneateOffLineAutForDocument.class.newInstance();
+				process = SRIGeneateOffLineAutForDocument.class.getConstructor().newInstance();
 			} catch (Exception e) {}			
 		}
 		return process;

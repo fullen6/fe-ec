@@ -1,9 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: FE-EC;singleton:=true
-Bundle-Version: 5.1.0.qualifier
+Bundle-Version: 7.1.0.qualifier
 Bundle-Vendor: INGEINT SA
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.adempiere.base;bundle-version="1.0.0",
  org.adempiere.base.process;bundle-version="1.0.0",
