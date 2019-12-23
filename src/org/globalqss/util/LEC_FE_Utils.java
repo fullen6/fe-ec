@@ -642,43 +642,42 @@ public class LEC_FE_Utils
 	}
 	
 	public static String allguides(Integer C_Invoice_ID, String trx, Integer record) {
-		
 		StringBuffer allguides = new StringBuffer();
 		int count = 0;
-		StringBuffer sql = new StringBuffer("SELECT distinct(mi.documentno),mi.dateAcct "
-				+ "FROM  m_inout mi,c_invoiceline il,m_inoutline mil " + 
-				"         WHERE il.c_invoice_id = ? " + 
-				"         and il.m_inoutline_id=mil.m_inoutline_id " + 
-				"         and mil.m_inout_id=mi.m_inout_id " + 
-				"         and mi.docstatus in ('CO','CL') " + 
-				"         and il.m_inoutline_id is not null " +
-				"		  order by mi.dateAcct, mi.documentno ");
-		
-		PreparedStatement pstmt = DB.prepareStatement(sql.toString(), trx);
-		
-		try {
-		pstmt.setInt(1, C_Invoice_ID);
-		ResultSet rs = pstmt.executeQuery();
-		//
+		StringBuffer sql = new StringBuffer("SELECT distinct mi.documentno, mi.dateAcct \n" 
+				+ "FROM m_inout mi \n"
+				+ "	join m_inoutline mil on mil.m_inout_id = mi.m_inout_id \n"
+				+ "	join c_invoiceline il on mil.m_inoutline_id = il.m_inoutline_id \n" 
+				+ "WHERE il.c_invoice_id = ? \n"
+				+ "    and mi.docstatus in ('CO','CL') \n" 
+				+ "    and il.m_inoutline_id is not null \n"
+				+ "    and length(mi.documentno) = 17 \n" 
+				+ "order by mi.dateAcct, mi.documentno ");
 
-		while (rs.next()) {
-			if (record == 1) {
-				allguides.append(rs.getString(1));
-				break;
-			}else {
-				if (count>=1)
-					allguides.append("/");
-				allguides.append(rs.getString(1));
+		PreparedStatement pstmt = DB.prepareStatement(sql.toString(), trx);
+
+		try {
+			pstmt.setInt(1, C_Invoice_ID);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				if (record == 1) {
+					allguides.append(rs.getString(1));
+					break;
+				} else {
+					if (count >= 1)
+						allguides.append("/");
+					allguides.append(rs.getString(1));
+				}
+				count++;
 			}
-			count++;
-		}rs.close();
-		pstmt.close();
-	}
-	catch (SQLException e)
-	{
-		return "Error al obtener las guias ";
-	}	
-		if (allguides.length()==0)
+			rs.close();
+			pstmt.close();
+		} catch (SQLException e) {
+			return "Error al obtener las guias ";
+		}
+		
+		if (allguides.length() == 0)
 			return "-";
 		else
 			return allguides.toString();
