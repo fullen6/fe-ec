@@ -26,5 +26,5 @@
 	<classpathentry kind="lib" path="lib/MITyCLibXADES-1.1.7.jar"/>
 	<classpathentry kind="lib" path="lib/xmlsec-1.4.2-ADSI-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

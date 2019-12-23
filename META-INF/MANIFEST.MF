@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: FE-EC;singleton:=true
+Bundle-SymbolicName: FE-EC
 Bundle-Version: 7.1.0.qualifier
 Bundle-Vendor: INGEINT SA
 Bundle-ActivationPolicy: lazy
