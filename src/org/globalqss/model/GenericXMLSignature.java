@@ -560,7 +560,7 @@ public abstract class GenericXMLSignature {
 	 * @param storeManager
 	 *            Interfaz de acceso al almacén
 	 * @return Primer certificado disponible en el almacén
-	 * @throws VeronicaException
+	 * @throws AdempiereException
 	 *             cuando el almacen está vacío o no se encuentran certificados con
 	 *             políticas.
 	 */

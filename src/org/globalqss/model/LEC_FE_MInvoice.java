@@ -845,7 +845,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			mmDoc.characters(valor.toCharArray(), 0, valor.length());
 			mmDoc.endElement("", "", "campoAdicional");
 
-			if (!getC_BPartner_Location().getC_Location().getCity().isEmpty()) {
+			if (getC_BPartner_Location().getC_Location().getCity() !=null && !getC_BPartner_Location().getC_Location().getCity().isEmpty()) {
 
 				atts.addAttribute("", "", "nombre", "CDATA", "Lugar de Pago");
 				mmDoc.startElement("", "", "campoAdicional", atts);
@@ -904,7 +904,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			mmDoc.endElement("", "", "infoAdicional");
 			mmDoc.endElement("", "", f.get_ValueAsString("XmlPrintLabel"));
 			mmDoc.endDocument();
-			mmDoc.endElement("", "", "campoAdicional");
+			//mmDoc.endElement("", "", "campoAdicional");
 
 			if (mmDocStream != null) {
 				try {
