@@ -67,6 +67,7 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 	/**
 	 * Prepare - e.g., get Parameters.
 	 */
+	@Override
 	protected void prepare() {
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++) {
@@ -85,6 +86,7 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 	 * @return info
 	 * @throws Exception
 	 */
+	@Override
 	protected String doIt() throws Exception {
 
 		String msg = "";
@@ -98,8 +100,8 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 			sql = "SELECT * FROM " + table + " a " + " JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
 					+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
 					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus = 'CO' "
-					+ " AND a.SRI_Authorization_ID is null " + " AND a.IsSRI_Error = 'N' "
-					+ " AND dt.sri_shortdoctype notnull ";
+					+ " AND a.SRI_Authorization_ID is null " + " AND a.issri_error = 'N' "
+					+ " AND dt.sri_shortdoctype notnull  ";
 
 			PreparedStatement pstmt = null;
 			try {
@@ -111,7 +113,7 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 				log.log(Level.SEVERE, sql, e);
 			}
 			msg = generate(pstmt, table);
-		}		
+		}
 
 		return msg;
 
@@ -208,11 +210,11 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 			msg = lecfeinvnd.lecfeinvnd_SriExportNotaDebitoXML100();
 			// !isSOTrx()
 		} else if (shortdoctype.equals("03")) { // LIQUIDACION DE COMPRAS
-			msg = lecfeinvpl.lecfeinv_SriExportInvoicePLXML100();			
+			msg = lecfeinvpl.lecfeinv_SriExportInvoicePLXML100();
 		} else if (shortdoctype.equals("07")) { // COMPROBANTE DE RETENCIÓN
 			if (lecfeinvret.get_ValueAsInt("SRI_Authorization_ID") < 1 && MSysConfig
 					.getBooleanValue("LEC_GenerateWitholdingToComplete", false, lecfeinvret.getAD_Client_ID())) {
-				LEC_FE_MRetencion.generateWitholdingNo(inv);			
+				LEC_FE_MRetencion.generateWitholdingNo(inv);
 				msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
 			}
 		} else

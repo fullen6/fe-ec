@@ -443,8 +443,8 @@ public class LEC_FE_MInvoice extends MInvoice {
 					+ "JOIN C_TaxCategory tca on t.C_TaxCategory_ID = tca.C_TaxCategory_ID "
 					+ "LEFT JOIN SRI_TaxCode tc ON t.SRI_TaxCode_ID = tc.SRI_TaxCode_ID "
 					+ "LEFT JOIN SRI_TaxRate tr ON t.SRI_TaxRate_ID = tr.SRI_TaxRate_ID "
-					+ "WHERE i.C_Invoice_ID = ? AND tca.IsWithholding = 'N' "
-					+ "GROUP BY codigo, codigoPorcentaje " + "ORDER BY codigo, codigoPorcentaje ");
+					+ "WHERE i.C_Invoice_ID = ? AND tca.IsWithholding = 'N' " + "GROUP BY codigo, codigoPorcentaje "
+					+ "ORDER BY codigo, codigoPorcentaje ");
 
 			try {
 				PreparedStatement pstmt = DB.prepareStatement(sql.toString(), get_TrxName());
@@ -845,7 +845,8 @@ public class LEC_FE_MInvoice extends MInvoice {
 			mmDoc.characters(valor.toCharArray(), 0, valor.length());
 			mmDoc.endElement("", "", "campoAdicional");
 
-			if (getC_BPartner_Location().getC_Location().getCity() !=null && !getC_BPartner_Location().getC_Location().getCity().isEmpty()) {
+			if (getC_BPartner_Location().getC_Location().getCity() != null
+					&& !getC_BPartner_Location().getC_Location().getCity().isEmpty()) {
 
 				atts.addAttribute("", "", "nombre", "CDATA", "Lugar de Pago");
 				mmDoc.startElement("", "", "campoAdicional", atts);
@@ -898,13 +899,13 @@ public class LEC_FE_MInvoice extends MInvoice {
 					valor = lp.toString().substring(count, lp.toString().length());
 				else
 					valor = "";
-				 
+
 			}
 
 			mmDoc.endElement("", "", "infoAdicional");
 			mmDoc.endElement("", "", f.get_ValueAsString("XmlPrintLabel"));
 			mmDoc.endDocument();
-			//mmDoc.endElement("", "", "campoAdicional");
+			// mmDoc.endElement("", "", "campoAdicional");
 
 			if (mmDocStream != null) {
 				try {
@@ -946,68 +947,68 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			if (dt.get_Value("IsGenerateInBatch") != null)
 				IsGenerateInBatch = dt.get_ValueAsBoolean("IsGenerateInBatch");
-			if (!signature.IsUseContingency && !IsGenerateInBatch) {
 
-				// Procesar Recepcion SRI
-				log.warning("@Sending Xml@ -> " + file_name);
-				msg = signature.respuestaRecepcionComprobante(file_name);
+			// Procesar Recepcion SRI
+			log.warning("@Sending Xml@ -> " + file_name);
+			msg = signature.respuestaRecepcionComprobante(file_name);
 
-				if (msg != null)
-					if (!msg.equals("RECIBIDA")) {
+			if (msg != null)
 
-						DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(),
-								true, get_TrxName());
+				if (msg.contains("ERROR-65"))
+					DB.executeUpdateEx(
+							"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
+							new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
+				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+					String invoiceNo = getDocumentNo();
+					String invoiceID = String.valueOf(get_ID());
+					a.setDescription(invoiceNo);
+					a.set_ValueOfColumn("DocumentID", invoiceID);
+					a.set_ValueOfColumn("C_Invoice_ID", get_ID());
+					a.saveEx();
+					set_Value("SRI_Authorization_ID", a.get_ID());
+					this.saveEx();
+					return msg;
+				}
 
-						int exist = DB.getSQLValue(null,
-								"SELECT Record_id FROM AD_Note WHERE AD_Table_ID = 318 AND Record_ID=? ", get_ID());
+			if (!msg.equals("RECIBIDA")) {
 
-						if (exist <= 0) {
-							MNote note = new MNote(getCtx(), 0, null);
-							note.setAD_Table_ID(318);
-							note.setReference("Error en Factura de venta, por favor valide la info del documento: "
-									+ getDocumentNo());
-							note.setAD_Org_ID(getAD_Org_ID());
-							note.setTextMsg(msg);
-							note.setAD_Message_ID("ErrorFE");
-							note.setRecord(318, getC_Invoice_ID());
-							note.setAD_User_ID(MSysConfig.getIntValue("ING_FEUserNotes", 100, getAD_Client_ID()));
-							note.setDescription(getDocumentNo());
-							set_Value("IsSRI_Error", true);
-							note.saveEx();
-							invoice.set_ValueOfColumn("IsSriError", true);
-							invoice.saveEx();
-						}
+				DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
+						get_TrxName());
 
-						// TODO Agregar al OffLine el error Maybe ADNote
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
-					}
-				String invoiceNo = getDocumentNo();
-				String invoiceID = String.valueOf(get_ID());
-				a.setDescription(invoiceNo);
-				a.set_ValueOfColumn("DocumentID", invoiceID);
-				a.set_ValueOfColumn("C_Invoice_ID", get_ID());
-				a.saveEx();
-				msg = null;
-				file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesEnProceso);
+				int exist = DB.getSQLValue(null,
+						"SELECT Record_id FROM AD_Note WHERE AD_Table_ID = 318 AND Record_ID=? ", get_ID());
 
-			} else { // emisionContingencia
-				// Completar en estos casos, luego usar Boton Procesar
-				// 170-Clave de contingencia pendiente
-				if (signature.IsUseContingency)
-					a.setSRI_ErrorCode_ID(LEC_FE_Utils.getErrorCode("170"));
-				// 70-Clave de acceso en procesamiento
-				if (IsGenerateInBatch)
-					a.setSRI_ErrorCode_ID(LEC_FE_Utils.getErrorCode("70"));
-				a.saveEx();
+				if (exist <= 0) {
+					MNote note = new MNote(getCtx(), 0, null);
+					note.setAD_Table_ID(318);
+					note.setReference(
+							"Error en Factura de venta, por favor valide la info del documento: " + getDocumentNo());
+					note.setAD_Org_ID(getAD_Org_ID());
+					note.setTextMsg(msg);
+					note.setAD_Message_ID("ErrorFE");
+					note.setRecord(318, getC_Invoice_ID());
+					note.setAD_User_ID(MSysConfig.getIntValue("ING_FEUserNotes", 100, getAD_Client_ID()));
+					note.setDescription(getDocumentNo());
+					set_Value("IsSRI_Error", true);
+					note.saveEx();
+					invoice.set_ValueOfColumn("IsSriError", true);
+					invoice.saveEx();
+				}
 
-				if (signature.isAttachXml())
-					LEC_FE_Utils.attachXmlFile(a.getCtx(), a.get_TrxName(), a.getSRI_Authorization_ID(), file_name);
-
+				// TODO Agregar al OffLine el error Maybe ADNote
+				return "Error en Factura No " + getDocumentNo() + " " + msg;
 			}
-			log.warning("@SRI_FileGenerated@ -> " + file_name);
+			String invoiceNo = getDocumentNo();
+			String invoiceID = String.valueOf(get_ID());
+			a.setDescription(invoiceNo);
+			a.set_ValueOfColumn("DocumentID", invoiceID);
+			a.set_ValueOfColumn("C_Invoice_ID", get_ID());
+			a.saveEx();
+			msg = null;
 
-			// if (LEC_FE_Utils.breakDialog("Completando Factura")) return "Cancelado...";
-			// // TODO Temp
+			file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesEnProceso);
+
+			log.warning("@SRI_FileGenerated@ -> " + file_name);
 
 			//
 		} catch (Exception e) {
