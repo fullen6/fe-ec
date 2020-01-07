@@ -86,7 +86,6 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 
-		
 		try {
 
 			signature.setAD_Org_ID(getAD_Org_ID());
@@ -327,8 +326,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 							+ ", COALESCE(tc.SRI_TaxCodeValue, '0') AS codigo "
 							+ ", COALESCE(tr.SRI_TaxRateValue, 'X') AS codigoPorcentaje "
 							+ ", iwh.TaxBaseAmt AS baseImponible " + ", t.Rate AS porcentajeRetener "
-							+ ", iwh.TaxAmt AS valorRetenido "
-							+ "  FROM C_Invoice i "
+							+ ", iwh.TaxAmt AS valorRetenido " + "  FROM C_Invoice i "
 							+ "JOIN C_DocType dt ON dt.C_DocType_ID = i.C_DocTypeTarget_ID "
 							+ "JOIN LCO_InvoiceWithholding iwh ON iwh.C_Invoice_ID = i.C_Invoice_ID "
 							+ "LEFT JOIN LCO_WithholdingRule whr ON iwh.LCO_WithholdingRule_ID = whr.LCO_WithholdingRule_ID "
@@ -448,26 +446,43 @@ public class LEC_FE_MRetencion extends MInvoice {
 				msg = signature.respuestaRecepcionComprobante(file_name);
 
 				if (msg != null)
-					if (!msg.equals("RECIBIDA")) {
-						String DocumentNo = DB.getSQLValueString(get_TrxName(),
-								"SELECT Description FROM AD_Note WHERE Description = ?", getDocumentNo());
-						DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(),
-								true, get_TrxName());
-						if (DocumentNo == null) {
-							MNote note = new MNote(getCtx(), 0, null);
-							note.setAD_Table_ID(318);
-							note.setReference(ErrorDocumentno + " de compra, por favor valide la info de retencion");
-							note.setAD_Org_ID(getAD_Org_ID());
-							note.setTextMsg(msg);
-							note.setAD_Message_ID("ErrorFE");
-							note.setRecord(318, getC_Invoice_ID());
-							note.setAD_User_ID(MSysConfig.getIntValue("ING_FEUserNotes", 100, getAD_Client_ID()));
-							note.setDescription(getDocumentNo());
-							note.saveEx();
-						}
 
-						return ErrorDocumentno + msg;
+					if (msg.contains("ERROR-65"))
+						DB.executeUpdateEx(
+								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
+								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
+					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+						String invoiceNo = getDocumentNo();
+						String invoiceID = String.valueOf(get_ID());
+						a.setDescription(invoiceNo);
+						a.set_ValueOfColumn("DocumentID", invoiceID);
+						a.set_ValueOfColumn("C_Invoice_ID", get_ID());
+						a.saveEx();
+						set_Value("SRI_Authorization_ID", a.get_ID());
+						this.saveEx();
+						return msg;
 					}
+
+				if (!msg.equals("RECIBIDA")) {
+					String DocumentNo = DB.getSQLValueString(get_TrxName(),
+							"SELECT Description FROM AD_Note WHERE Description = ?", getDocumentNo());
+					DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
+							get_TrxName());
+					if (DocumentNo == null) {
+						MNote note = new MNote(getCtx(), 0, null);
+						note.setAD_Table_ID(318);
+						note.setReference(ErrorDocumentno + " de compra, por favor valide la info de retencion");
+						note.setAD_Org_ID(getAD_Org_ID());
+						note.setTextMsg(msg);
+						note.setAD_Message_ID("ErrorFE");
+						note.setRecord(318, getC_Invoice_ID());
+						note.setAD_User_ID(MSysConfig.getIntValue("ING_FEUserNotes", 100, getAD_Client_ID()));
+						note.setDescription(getDocumentNo());
+						note.saveEx();
+					}
+
+					return ErrorDocumentno + msg;
+				}
 				String invoiceNo = getDocumentNo();
 				String invoiceID = String.valueOf(get_ID());
 				a.setDescription(invoiceNo);
@@ -640,8 +655,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 	/**
 	 * generateWitholdingNo
 	 * 
-	 * @param MLCOInvoiceWithholding
-	 *            iwh
+	 * @param MLCOInvoiceWithholding iwh
 	 * 
 	 * @return SequenceNo
 	 */
