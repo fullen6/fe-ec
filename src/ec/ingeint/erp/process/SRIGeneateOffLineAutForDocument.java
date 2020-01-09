@@ -60,6 +60,8 @@ public class SRIGeneateOffLineAutForDocument extends SvrProcess {
 			
 			String msg="";
 			
+			System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
+			
 				if ("C_Invoice_ID".equals(table)) {					
 					MInvoice inv = new MInvoice (getCtx(), C_Invoice_ID, get_TrxName());
 					msg = invoiceGenerateXml(inv);

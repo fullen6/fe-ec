@@ -492,6 +492,23 @@ public class LEC_FE_MInOut extends MInOut
 	        msg = signature.respuestaRecepcionComprobante(file_name);
 	        
 	        if (msg != null)
+	        	
+	        	if (msg.contains("ERROR-65"))
+					DB.executeUpdateEx(
+							"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
+							new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
+				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+					String invoiceNo = getDocumentNo();
+					String invoiceID = String.valueOf(get_ID());
+					a.setDescription(invoiceNo);
+					a.set_ValueOfColumn("DocumentID", invoiceID);
+					a.set_ValueOfColumn("M_InOut_ID", get_ID());
+					a.saveEx();
+					set_Value("SRI_Authorization_ID", a.get_ID());
+					this.saveEx();
+					return msg;
+				}
+	        	
 	        	if (!msg.equals("RECIBIDA")) {
 	        		DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = "+a.get_ID(), true, get_TrxName());
 	        		return ErrorDocumentno+msg;
