@@ -91,7 +91,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 
 		try {
-
+			log.warning("Documento a procesar: "+getDocumentNo());
 			signature.setAD_Org_ID(getAD_Org_ID());
 			m_identificacionconsumidor = MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null,
 					getAD_Client_ID());
@@ -958,7 +958,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 					DB.executeUpdateEx(
 							"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
 							new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
-				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) { 
 					String invoiceNo = getDocumentNo();
 					String invoiceID = String.valueOf(get_ID());
 					a.setDescription(invoiceNo);

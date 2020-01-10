@@ -436,10 +436,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 			file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesFirmados);
 
-			if (!signature.IsUseContingency) {
-
-				// if (LEC_FE_Utils.breakDialog("Enviando Comprobante al SRI")) return
-				// "Cancelado..."; // TODO Temp
+			if (!signature.IsUseContingency) {				
 
 				// Procesar Recepcion SRI
 				log.warning("@Sending Xml@ -> " + file_name);
@@ -451,7 +448,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 						DB.executeUpdateEx(
 								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
 								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
-					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 						String invoiceNo = getDocumentNo();
 						String invoiceID = String.valueOf(get_ID());
 						a.setDescription(invoiceNo);

@@ -497,7 +497,7 @@ public class LEC_FE_MInOut extends MInOut
 					DB.executeUpdateEx(
 							"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
 							new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
-				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 					String invoiceNo = getDocumentNo();
 					String invoiceID = String.valueOf(get_ID());
 					a.setDescription(invoiceNo);
