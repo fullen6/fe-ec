@@ -142,7 +142,9 @@ public class SRIGeneateOffLineAutForDocument extends SvrProcess {
 				msg = lecfeinvnd.lecfeinvnd_SriExportNotaDebitoXML100();
 				// !isSOTrx()
 			} else if (shortdoctype.equals("07")) { // COMPROBANTE DE RETENCIÓN
-				if (lecfeinvret.get_ValueAsInt("SRI_Authorization_ID") < 1	&& MSysConfig.getBooleanValue("LEC_GenerateWitholdingToComplete", false,lecfeinvret.getAD_Client_ID())) {
+				if (lecfeinvret.get_ValueAsInt("SRI_Authorization_ID") < 1	
+						&& MSysConfig.getBooleanValue("LEC_GenerateWitholdingToComplete", 
+								false,lecfeinvret.getAD_Client_ID())) {
 					LEC_FE_MRetencion.generateWitholdingNo(inv);
 					//Trx tra = Trx.get(inv.get_TrxName(), false);
 					//tra.commit();
