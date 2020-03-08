@@ -612,7 +612,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 								+ "il.c_uom_id ");
 			} else {
 				sql = new StringBuffer(
-						"SELECT i.C_Invoice_ID, COALESCE(p.value, '0'), (case  WHEN p.m_product_id isnull THEN '0' when p.upc isnull or p.upc ='' then p.value else p.upc END),"
+						"SELECT i.C_Invoice_ID, COALESCE(p.value, c.name), (case  WHEN p.m_product_id isnull THEN '0' when p.upc isnull or p.upc ='' then p.value else p.upc END),"
 								+ " ilt.name, ilt.QtyEntered, ROUND(ilt.PriceEntered,6), COALESCE(il.discountAmt,0) AS discount "
 								+ ",(ilt.linenetamt - COALESCE(il.discountAmt,0)) as linenetamt  "
 								+ ", COALESCE(tc.SRI_TaxCodeValue, '0') AS codigo "

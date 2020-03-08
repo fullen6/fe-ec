@@ -18,6 +18,8 @@ import org.globalqss.model.LEC_FE_MRetencion;
 import org.globalqss.model.LEC_FE_Movement;
 import org.globalqss.model.X_SRI_Authorization;
 
+import ec.ingeint.erp.model.LEC_FE_MInvoicePL;
+
 public class SRIGeneateOffLineAutForDocument extends SvrProcess {
 
 	String table = "";
@@ -124,6 +126,8 @@ public class SRIGeneateOffLineAutForDocument extends SvrProcess {
 			msg = null;
 			LEC_FE_MInvoice lecfeinv = new LEC_FE_MInvoice(inv.getCtx(),
 					inv.getC_Invoice_ID(), inv.get_TrxName());
+			LEC_FE_MInvoicePL lecfeinvpl = new LEC_FE_MInvoicePL(inv.getCtx(), 
+					inv.getC_Invoice_ID(), inv.get_TrxName());
 			LEC_FE_MNotaCredito lecfeinvnc = new LEC_FE_MNotaCredito(inv.getCtx(),
 					inv.getC_Invoice_ID(), inv.get_TrxName());
 			LEC_FE_MNotaDebito lecfeinvnd = new LEC_FE_MNotaDebito(inv.getCtx(),
@@ -136,6 +140,8 @@ public class SRIGeneateOffLineAutForDocument extends SvrProcess {
 
 			if (shortdoctype.equals("01")) { // FACTURA
 				msg = lecfeinv.lecfeinv_SriExportInvoiceXML100();
+			} else if (shortdoctype.equals("03")) { // LIQUIDACION DE COMPRAS
+				msg = lecfeinvpl.lecfeinv_SriExportInvoicePLXML100();
 			} else if (shortdoctype.equals("04")) { // NOTA DE CRÉDITO
 				msg = lecfeinvnc.lecfeinvnc_SriExportNotaCreditoXML100();
 			} else if (shortdoctype.equals("05")) { // NOTA DE DÉBITO
