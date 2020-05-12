@@ -220,6 +220,7 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		
 		if(c_invoice_id<=0) {
 			authorization.set_ValueOfColumn("IsSRI_Error", true);
+			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 			authorization.saveEx();
 			msg = "Error obteniendo factura";
 			log.severe(msg);
@@ -247,8 +248,9 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 			if (msg != null) {
 				authorization.set_ValueOfColumn("IsSRI_Error", true);
+				authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 				authorization.saveEx();
-				throw new AdempiereException(msg);
+				return msg;
 			}
 
 			m_created++;
@@ -275,7 +277,6 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 			msg = "No se pudo obtener autorizacion - " + e.getMessage();
 			log.severe(msg);
 			msgError = msg;
-			//throw new AdempiereException(msg);
 		}
 
 		return msg;
@@ -294,9 +295,10 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		int c_invoice_id = LEC_FE_Utils.getAuthorisedInvoice(authorization.getSRI_Authorization_ID());
 
 		if(c_invoice_id<=0) {
+			msg = "Error obteniendo Factura";
 			authorization.set_ValueOfColumn("IsSRI_Error", true);
+			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 			authorization.saveEx();
-			msg = "Error obteniendo factura";
 			log.severe(msg);
 			msgError = msg;
 			return msg;
@@ -322,8 +324,9 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 			if (msg != null) {
 				authorization.set_ValueOfColumn("IsSRI_Error", true);
+				authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 				authorization.saveEx();
-				throw new AdempiereException(msg);
+				return msg;
 			}
 
 			m_created++;
@@ -350,7 +353,6 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 			msg = "No se pudo obtener autorizacion - " + e.getMessage();
 			log.severe(msg);
 			msgError = msg;
-			//throw new AdempiereException(msg);
 		}
 
 		return msg;
@@ -367,9 +369,10 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		int c_inout_id = LEC_FE_Utils.getAuthorisedInOut(authorization.getSRI_Authorization_ID());
 
 		if(c_inout_id==0) {
-			authorization.set_ValueOfColumn("IsSRI_Error", true);
-			authorization.saveEx();
 			msg = "Error obteniendo Entrada/Salida";
+			authorization.set_ValueOfColumn("IsSRI_Error", true);
+			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
+			authorization.saveEx();
 			log.severe(msg);
 			msgError = msg;
 			return msg;
@@ -397,8 +400,9 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 			if (msg != null) {
 				authorization.set_ValueOfColumn("IsSRI_Error", true);
+				authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 				authorization.saveEx();
-				throw new AdempiereException(msg);
+				return msg;
 			}
 
 			m_created++;
@@ -424,7 +428,6 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 			msg = "No se pudo obtener autorizacion - " + e.getMessage();
 			log.severe(msg);
 			msgError = msg;
-			//throw new AdempiereException(msg);
 		}
 
 		return msg;
@@ -443,9 +446,10 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		int c_movement_id = LEC_FE_Utils.getAuthorisedMovement(authorization.getSRI_Authorization_ID());
 
 		if(c_movement_id==0) {
+			msg = "Error obteniendo Movimiento";
 			authorization.set_ValueOfColumn("IsSRI_Error", true);
+			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 			authorization.saveEx();
-			msg = "Error obteniendo movimiento";
 			log.severe(msg);
 			msgError = msg;
 			return msg;
@@ -473,8 +477,9 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 			if (msg != null) {
 				authorization.set_ValueOfColumn("IsSRI_Error", true);
+				authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 				authorization.saveEx();
-				throw new AdempiereException(msg);
+				return msg;
 			}
 			
 			m_created++;
@@ -502,7 +507,6 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 			msg = "No se pudo obtener autorizacion - " + e.getMessage();
 			log.severe(msg);
 			msgError = msg;
-			//throw new AdempiereException(msg);
 		}
 
 		return msg;

@@ -79,15 +79,15 @@ public class LEC_FE_MRetencion extends MInvoice {
 	}
 
 	public String lecfeinvret_SriExportRetencionXML100() {
-
+		String msgStatus = "";
 		int autorizationID = 0;
 		String msg = null;
-		String ErrorDocumentno = "Error en Factura No " + getDocumentNo() + " ";
+		String ErrorDocumentno = "Error en Retención No " + getDocumentNo() + " ";
 
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 
 		try {
-
+			//log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
 			signature.setAD_Org_ID(getAD_Org_ID());
 
 			m_identificacionconsumidor = MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null,
@@ -143,23 +143,31 @@ public class LEC_FE_MRetencion extends MInvoice {
 			MLocation lm = new MLocation(getCtx(), c_location_matriz_id, get_TrxName());
 
 			// Comprador
+			msgStatus = "Partner";
 			MBPartner bp = new MBPartner(getCtx(), getC_BPartner_ID(), get_TrxName());
 			if (!signature.isOnTesting())
 				m_razonsocial = bp.getName();
 
+			msgStatus = "TaxIdTyp";
 			X_LCO_TaxIdType ttc = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"),
 					get_TrxName());
 
+			msgStatus = "TipoIdentificacionSr";
 			m_tipoidentificacioncomprador = LEC_FE_Utils
 					.getTipoIdentificacionSri(ttc.get_Value("LEC_TaxCodeSRI").toString());
 
+			msgStatus = "TaxID";
 			m_identificacioncomprador = bp.getTaxID();
 
+			msgStatus = "InvoiceWithholding";
 			m_retencionno = DB.getSQLValueString(get_TrxName(),
 					"SELECT DISTINCT(DocumentNo) FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ",
 					getC_Invoice_ID());
+			if (m_retencionno == null)
+				return ErrorDocumentno + "Error en retención no encontrada";
 			if (m_retencionno.length() < 17)
-				return "Error en longitud del número de retención";
+				return ErrorDocumentno + "Error en longitud del número de retención";
+			
 			// IsUseContingency
 			int sri_accesscode_id = 0;
 			if (signature.IsUseContingency) {
@@ -181,6 +189,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 			ac.setIsUsed(true);
 
 			// Access Code
+			msgStatus = "AccessCode";
 			m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
 					oi.get_ValueAsString("SRI_OrgCode"),
 					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(m_retencionno, m_coddoc)), m_retencionno,
@@ -457,7 +466,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 						a.saveEx();
 						set_Value("SRI_Authorization_ID", a.get_ID());
 						this.saveEx();
-						return msg;
+						return ErrorDocumentno + msg;
 					}
 
 				if (!msg.equals("RECIBIDA")) {
@@ -502,7 +511,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 							// ignore exceptions
 							log.warning(msg + ex.getMessage());
 						else
-							return msg;
+							return ErrorDocumentno + msg;
 					}
 					file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesAutorizados);
 				} else {
@@ -525,12 +534,12 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 			//
 		} catch (Exception e) {
-			msg = "No se pudo crear XML - " + e.getMessage();
-			log.severe(msg);
+			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();
+			// log.severe(msg);
 
 			return ErrorDocumentno + msg;
 		} catch (Error e) {
-			msg = "No se pudo crear XML- Error en Conexion con el SRI";
+			msg = "No se pudo crear XML - Error en Conexion con el SRI";
 			return ErrorDocumentno + msg;
 		}
 

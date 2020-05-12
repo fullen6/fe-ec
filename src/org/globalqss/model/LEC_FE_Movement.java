@@ -79,17 +79,18 @@ public class LEC_FE_Movement extends MMovement
 	
 	public String lecfeMovement_SriExportMovementXML100 ()
 	{
+		String msgStatus = "";
 		Trx autorizacionTrx = null;
 		m_trxAutorizacionName=null;
 		int autorizationID = 0;
 		String msg = null;
-		String ErrorDocumentno = "Error en Mov. de Inventario No "+getDocumentNo()+" ";
+		String ErrorDocumentno = "Error en Movimiento No "+getDocumentNo()+" ";
 		
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 		
 		try
 		{
-			
+			//log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
 		signature.setAD_Org_ID(getAD_Org_ID());
 			
 		m_identificacionconsumidor=MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null, getAD_Client_ID());
@@ -142,17 +143,22 @@ public class LEC_FE_Movement extends MMovement
 		MLocation lw = new MLocation(getCtx(), c_location_id, get_TrxName());
 		
 		// Comprador
+		msgStatus = "Partner";
 		MBPartner bp = new MBPartner(getCtx(), getC_BPartner_ID(), get_TrxName());
 		if (bp.get_ID()==0)
-			return ErrorDocumentno+"Debe Seleccionar un Tercero";
+			return ErrorDocumentno + "Debe Seleccionar un Tercero";
 		if (!signature.isOnTesting()) m_razonsocial = bp.getName();
-		
+
+		msgStatus = "Location";
 		MLocation bpl = new MLocation(getCtx(), getC_BPartner_Location().getC_Location_ID(), get_TrxName());	// TODO Reviewme
-		
+
+		msgStatus = "TaxIdTyp";
 		X_LCO_TaxIdType ttc = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"), get_TrxName());
-		
+
+		msgStatus = "TaxCodeSRI";
 		m_tipoidentificacioncomprador = LEC_FE_Utils.getTipoIdentificacionSri(ttc.get_Value("LEC_TaxCodeSRI").toString());
-		
+
+		msgStatus = "TaxID";
 		m_identificacioncomprador = bp.getTaxID();
 		
 		X_LCO_TaxIdType tt = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"), get_TrxName());
@@ -161,10 +167,13 @@ public class LEC_FE_Movement extends MMovement
 		
 		// Transportista
 		Boolean isventamostrador = false;
+		msgStatus = "ShipDate";
 		Timestamp datets = (Timestamp) get_Value("ShipDate");
+		msgStatus = "ShipDateE";
 		Timestamp datete = (Timestamp) get_Value("ShipDateE");
 		int m_shipper_id = getM_Shipper_ID();
 		
+		msgStatus = "Shipper";
 		if (m_shipper_id == 0) {
 			return ErrorDocumentno+"No existe definicion Transportista";
 		}
@@ -187,6 +196,7 @@ public class LEC_FE_Movement extends MMovement
 			return ErrorDocumentno+"Debe indicar fechas de transporte";
 		
 		// IsUseContingency
+		msgStatus = "AccessCode";
 		int sri_accesscode_id = 0;
 		if (signature.IsUseContingency) {
 			sri_accesscode_id = LEC_FE_Utils.getNextAccessCode(getAD_Client_ID(), signature.getEnvType(), oi.getTaxID(), get_TrxName());
@@ -529,7 +539,7 @@ public class LEC_FE_Movement extends MMovement
 			        	// ignore exceptions
 			        	log.warning(msg + ex.getMessage());
 		        	else
-		        		return msg;
+		        		return ErrorDocumentno+msg;
 		        }
 			    file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesAutorizados);
         	} else {
@@ -556,8 +566,7 @@ public class LEC_FE_Movement extends MMovement
 		}
 		catch (Exception e)
 		{
-			msg = "No se pudo crear XML - " + e.getMessage();
-			log.severe(msg);
+			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();
 			if (autorizacionTrx!=null){
         		autorizacionTrx.rollback();
 				autorizacionTrx.close();
@@ -576,10 +585,10 @@ public class LEC_FE_Movement extends MMovement
         			note.saveEx();
     			}
 			}
-			return ErrorDocumentno+msg;
+			return ErrorDocumentno + msg;
 		}catch (Error e) {
-			msg = "No se pudo crear XML- Error en Conexion con el SRI";
-			return ErrorDocumentno+msg;
+			msg = "No se pudo crear XML - Error en Conexion con el SRI";
+			return ErrorDocumentno + msg;
 		}
 		if (autorizacionTrx!=null){
     		autorizacionTrx.commit();
