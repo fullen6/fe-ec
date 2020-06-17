@@ -85,13 +85,15 @@ public class LEC_FE_MInvoice extends MInvoice {
 	}
 
 	public String lecfeinv_SriExportInvoiceXML100() {
-
+		String msgStatus = "";
 		String msg = null;
 		X_SRI_Authorization a = null;
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
+		String ErrorDocumentno = "Error en Factura No " + getDocumentNo() + " ";
 
 		try {
 			log.warning("Documento a procesar: " + getDocumentNo());
+			//log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
 			signature.setAD_Org_ID(getAD_Org_ID());
 			m_identificacionconsumidor = MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null,
 					getAD_Client_ID());
@@ -103,7 +105,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 					MSysConfig.getValue("QSSLEC_FE_ClaveCertificadoDigital", null, getAD_Client_ID(), getAD_Org_ID()));
 
 			if (signature.getFolderRaiz() == null)
-				return "Error en Factura No " + getDocumentNo() + " No existe parametro para Ruta Generacion Xml";
+				return ErrorDocumentno + "No existe parametro para Ruta Generacion Xml";
 
 			MDocType dt = new MDocType(getCtx(), getC_DocTypeTarget_ID(), get_TrxName());
 			if (dt.get_Value("IsInternal") != null)
@@ -112,7 +114,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			m_coddoc = dt.get_ValueAsString("SRI_ShortDocType");
 
 			if (m_coddoc.equals(""))
-				return "Error en Factura No " + getDocumentNo() + " No existe definicion SRI_ShortDocType: "
+				return ErrorDocumentno + "No existe definicion SRI_ShortDocType: "
 						+ dt.toString();
 
 			// Formato
@@ -120,7 +122,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 					m_coddoc, getDateInvoiced(), getDateInvoiced());
 
 			if (m_lec_sri_format_id < 1)
-				return "Error en Factura No " + getDocumentNo() + " No existe formato para el comprobante";
+				return ErrorDocumentno + "No existe formato para el comprobante";
 
 			X_LEC_SRI_Format f = new X_LEC_SRI_Format(getCtx(), m_lec_sri_format_id, get_TrxName());
 
@@ -130,7 +132,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			msg = LEC_FE_ModelValidator.valideOrgInfoSri(oi);
 
 			if (msg != null)
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 
 			if ((Boolean) oi.get_Value("SRI_IsKeepAccounting"))
 				m_obligadocontabilidad = "SI";
@@ -146,16 +148,20 @@ public class LEC_FE_MInvoice extends MInvoice {
 			MLocation lm = new MLocation(getCtx(), c_location_matriz_id, get_TrxName());
 
 			// Comprador
+			msgStatus = "Partner";
 			MBPartner bp = new MBPartner(getCtx(), getC_BPartner_ID(), get_TrxName());
 			if (!signature.isOnTesting())
 				m_razonsocial = bp.getName();
 
+			msgStatus = "TaxIdType";
 			X_LCO_TaxIdType ttc = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"),
 					get_TrxName());
 
+			msgStatus = "TaxCodeSRI";
 			m_tipoidentificacioncomprador = LEC_FE_Utils
 					.getTipoIdentificacionSri(ttc.get_Value("LEC_TaxCodeSRI").toString());
 
+			msgStatus = "TaxID";
 			m_identificacioncomprador = bp.getTaxID();
 
 			X_LCO_TaxIdType tt = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"),
@@ -163,6 +169,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			if (tt.getLCO_TaxIdType_ID() == 1000011) // Hardcoded F Final // TODO Deprecated
 				m_identificacioncomprador = m_identificacionconsumidor;
 
+			msgStatus = "InvoiceDocSustento";
 			m_inout_sus_id = LEC_FE_Utils.getInvoiceDocSustento(getC_Invoice_ID());
 
 			if (m_inout_sus_id < 1)
@@ -175,6 +182,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				inoutsus = new MInOut(getCtx(), m_inout_sus_id, get_TrxName());
 
 			// Support ticket http://support.ingeint.com/issues/727
+			msgStatus = "Desc";
 			m_totaldescuento = DB.getSQLValueBD(get_TrxName(),
 					"SELECT COALESCE(SUM(il.DiscountAmt), 0) FROM c_invoiceLine il WHERE il.C_Invoice_ID = ? ",
 					getC_Invoice_ID());
@@ -183,6 +191,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				m_totaldescuento = Env.ZERO;
 
 			//
+			msgStatus = "AccessCode";
 			int sri_accesscode_id = 0;
 			if (signature.IsUseContingency) {
 				sri_accesscode_id = LEC_FE_Utils.getNextAccessCode(getAD_Client_ID(), signature.getEnvType(),
@@ -214,7 +223,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			if (!ac.save()) {
 				msg = "@SaveError@ No se pudo grabar SRI Access Code";
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 			}
 
 			// New Authorization
@@ -330,14 +339,14 @@ public class LEC_FE_MInvoice extends MInvoice {
 					if (!get_Value("SRI_ComercioExterior").equals("EXPORTADOR")) {
 						msg = "Tipo de Comercio Exterior No Valido";
 						log.warning("Tipo de Comercio Exterior No Valido");
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 					addHeaderElement(mmDoc, "comercioExterior", get_Value("SRI_ComercioExterior").toString(), atts);
 					// Numerico Max 10 Referencia para obtener el termino de negociación
 					if (get_Value("et_incoterms") == null) {
 						msg = "Debe especificar un Termino de Negociación";
 						log.warning("Debe especificar un Termino de Negociación");
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 
 					addHeaderElement(mmDoc, "incoTermFactura",
@@ -347,14 +356,14 @@ public class LEC_FE_MInvoice extends MInvoice {
 					if (lo.getCity() == null) {
 						msg = "La Localización de la Organización debe tener una Ciudad";
 						log.warning("La Localización de la Organización debe tener una Ciudad");
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 					addHeaderElement(mmDoc, "lugarIncoTerm", LEC_FE_Utils.cutString(lo.getCity(), 300), atts);
 					// Numerico Max 3, Codigo Pais Origen
 					if (lo.getCountry().get_Value("AreaCode") == null) {
 						msg = "EL Pais de Origen debe tener un Codigo de Area";
 						log.warning("EL Pais de Origen debe tener un Codigo de Area");
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 					addHeaderElement(mmDoc, "paisOrigen",
 							LEC_FE_Utils.cutString(lo.getCountry().get_Value("AreaCode").toString(), 3), atts);
@@ -364,13 +373,13 @@ public class LEC_FE_MInvoice extends MInvoice {
 					if (getC_Order() == null) {
 						msg = "La Factura debe esta relacionada a una Orden de Venta con Dirección de entrega";
 						log.warning("La Factura debe esta relacionada a una Orden de Venta con Dirección de entrega");
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 					MLocation loBpShip = (MLocation) getC_Order().getC_BPartner_Location().getC_Location();
 					if (loBpShip.getCity() == null) {
 						msg = "La Dirección de Entrega Debe Tener Una Ciudad";
 						log.warning("La Dirección de Entrega Debe Tener Una Ciudad");
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 					addHeaderElement(mmDoc, "puertoDestino", LEC_FE_Utils.cutString(loBpShip.getCity(), 300), atts);
 					// Numerico 3, Codigo Pais Destino para la entrega
@@ -455,7 +464,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				while (rs.next()) {
 					if (rs.getString(1).equals("0") || rs.getString(2).equals("X")) {
 						msg = "Impuesto sin Tipo ó Porcentaje impuesto SRI";
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 
 					mmDoc.startElement("", "", "totalImpuesto", atts);
@@ -484,7 +493,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			} catch (SQLException e) {
 				log.log(Level.SEVERE, sql.toString(), e);
 				msg = "Error SQL: " + sql.toString();
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 			}
 
 			mmDoc.endElement("", "", "totalConImpuestos");
@@ -670,7 +679,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 					if (UOMNameOb == null) {
 						msg = "Error en Nombre de Unidad de Medida";
 						log.log(Level.SEVERE, msg);
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 
 					atts.clear();
@@ -685,7 +694,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 					mmDoc.startElement("", "", "impuestos", atts);
 					if (rs.getString(9).equals("0") || rs.getString(10).equals("X")) {
 						msg = "Impuesto sin Tipo ó Porcentaje impuesto SRI";
-						return "Error en Factura No " + getDocumentNo() + " " + msg;
+						return ErrorDocumentno + msg;
 					}
 
 					mmDoc.startElement("", "", "impuesto", atts);
@@ -714,7 +723,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			} catch (SQLException e) {
 				log.log(Level.SEVERE, sql.toString(), e);
 				msg = "Error SQL: " + sql.toString();
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 			}
 
 			String valor = "";
@@ -917,21 +926,21 @@ public class LEC_FE_MInvoice extends MInvoice {
 			if (m_sumadescuento.compareTo(m_totaldescuento) != 0) {
 				msg = "Error Diferencia Descuento Total: " + m_totaldescuento.toString() + " Detalles: "
 						+ m_sumadescuento.toString();
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 			}
 
 			if (m_sumabaseimponible.compareTo(m_totalbaseimponible) != 0
 					&& m_totalbaseimponible.subtract(m_sumabaseimponible).abs().compareTo(LEC_FE_UtilsXml.HALF) > 1) {
 				msg = "Error Diferencia Base Impuesto Total: " + m_totalbaseimponible.toString() + " Detalles: "
 						+ m_sumabaseimponible.toString();
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 			}
 
 			if (m_sumavalorimpuesto.compareTo(m_totalvalorimpuesto) != 0
 					&& m_totalvalorimpuesto.subtract(m_sumavalorimpuesto).abs().compareTo(LEC_FE_UtilsXml.HALF) > 1) {
 				msg = "Error Diferencia Impuesto Total: " + m_totalvalorimpuesto.toString() + " Detalles: "
 						+ m_sumavalorimpuesto.toString();
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 			}
 
 			// if (LEC_FE_Utils.breakDialog("Firmando Xml")) return "Cancelado..."; // TODO
@@ -996,7 +1005,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				}
 
 				// TODO Agregar al OffLine el error Maybe ADNote
-				return "Error en Factura No " + getDocumentNo() + " " + msg;
+				return ErrorDocumentno + msg;
 			}
 			String invoiceNo = getDocumentNo();
 			String invoiceID = String.valueOf(get_ID());
@@ -1012,15 +1021,17 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			//
 		} catch (Exception e) {
-			msg = "No se pudo crear XML - " + e.getMessage();
-			log.severe(msg);
-			return "Error en Factura No " + getDocumentNo() + " " + msg;
+			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();
+			// log.severe(msg);
+
+			return ErrorDocumentno + msg;
 		} catch (Error e) {
-			msg = "No se pudo crear XML- Error en Conexion con el SRI";
-			return "Error en Factura No " + getDocumentNo() + " " + msg;
+			msg = "No se pudo crear XML - Error en Conexion con el SRI";
+			return ErrorDocumentno + msg;
 		}
 		set_Value("SRI_Authorization_ID", a.get_ID());
 		this.saveEx();
+		
 		return msg;
 
 	} // lecfeinv_SriExportInvoiceXML100

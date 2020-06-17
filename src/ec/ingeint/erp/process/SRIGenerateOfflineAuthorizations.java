@@ -128,13 +128,13 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 				msg = "";
 				if ("C_Invoice".equals(table)) {
 					MInvoice inv = new MInvoice(getCtx(), rs, get_TrxName());
-					invoiceGenerateXml(inv);
+					msg = invoiceGenerateXml(inv);
 				} else if ("M_InOut".equals(table)) {
 					MInOut io = new MInOut(getCtx(), rs, get_TrxName());
-					inoutGenerateXml(io);
+					msg = inoutGenerateXml(io);
 				} else if ("M_Movement".equals(table)) {
 					MMovement mov = new MMovement(getCtx(), rs, get_TrxName());
-					movementGenerateXml(mov);
+					msg = movementGenerateXml(mov);
 				}
 				m_created++;
 				if (msg != "" && msg != null)

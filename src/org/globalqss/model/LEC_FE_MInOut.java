@@ -76,6 +76,7 @@ public class LEC_FE_MInOut extends MInOut
 	
 	public String lecfeinout_SriExportInOutXML100 ()
 	{
+		String msgStatus = "";
 		int autorizationID = 0;
 		String msg = null;
 		String ErrorDocumentno = "Error en Entrega a Cliente No "+getDocumentNo()+" ";  
@@ -84,6 +85,7 @@ public class LEC_FE_MInOut extends MInOut
 		
 		try
 		{
+			//log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
 			
 		signature.setAD_Org_ID(getAD_Org_ID());
 			
@@ -133,15 +135,19 @@ public class LEC_FE_MInOut extends MInOut
 		MLocation lw = new MLocation(getCtx(), getM_Warehouse().getC_Location_ID(), get_TrxName());
 		
 		// Comprador
+		msgStatus = "Partner";
 		MBPartner bp = new MBPartner(getCtx(), getC_BPartner_ID(), get_TrxName());
 		if (!signature.isOnTesting()) m_razonsocial = bp.getName();
-		
+
+		msgStatus = "Location";
 		MLocation bpl = new MLocation(getCtx(), getC_BPartner_Location().getC_Location_ID(), get_TrxName());	// TODO Reviewme
 		
 		X_LCO_TaxIdType ttc = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"), get_TrxName());
-		
+
+		msgStatus = "axCodeSRI";
 		m_tipoidentificacioncomprador = LEC_FE_Utils.getTipoIdentificacionSri(ttc.get_Value("LEC_TaxCodeSRI").toString());
-		
+
+		msgStatus = "TaxID";
 		m_identificacioncomprador = bp.getTaxID();
 		
 		X_LCO_TaxIdType tt = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"), get_TrxName());
@@ -150,8 +156,11 @@ public class LEC_FE_MInOut extends MInOut
 		
 		// Transportista
 		Boolean isventamostrador = false;
+		msgStatus = "ShipDate";
 		Timestamp datets = getShipDate();
+		msgStatus = "ShipDateE";
 		Timestamp datete = (Timestamp) get_Value("ShipDateE");
+		msgStatus = "Shipper";
 		int m_shipper_id = getM_Shipper_ID();
 		
 		if (m_shipper_id == 0) {
@@ -195,6 +204,7 @@ public class LEC_FE_MInOut extends MInOut
 			return ErrorDocumentno+"Debe indicar fechas de transporte";
 		
 		// IsUseContingency
+		msgStatus = "AccessCode";
 		int sri_accesscode_id = 0;
 		if (signature.IsUseContingency) {
 			sri_accesscode_id = LEC_FE_Utils.getNextAccessCode(getAD_Client_ID(), signature.getEnvType(), oi.getTaxID(), get_TrxName());
@@ -506,7 +516,7 @@ public class LEC_FE_MInOut extends MInOut
 					a.saveEx();
 					set_Value("SRI_Authorization_ID", a.get_ID());
 					this.saveEx();
-					return msg;
+					return ErrorDocumentno+msg;
 				}
 	        	
 	        	if (!msg.equals("RECIBIDA")) {
@@ -537,7 +547,7 @@ public class LEC_FE_MInOut extends MInOut
 			        	// ignore exceptions
 			        	log.warning(msg + ex.getMessage());
 		        	else
-		        		return msg;
+		        		return ErrorDocumentno+msg;
 		        }
 			    file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesAutorizados);
         	} else {
@@ -596,13 +606,14 @@ public class LEC_FE_MInOut extends MInOut
 		}
 		catch (Exception e)
 		{
-			msg = "No se pudo crear XML - " + e.getMessage();
-			log.severe(msg);
-			notifyError(msg);				
-			return ErrorDocumentno+msg;
+			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();
+			// log.severe(msg);
+
+			notifyError(msg);	
+			return ErrorDocumentno + msg;
 		}catch (Error e) {
-			msg = "No se pudo crear XML- Error en Conexion con el SRI";
-			return ErrorDocumentno+msg;
+			msg = "No se pudo crear XML - Error en Conexion con el SRI";
+			return ErrorDocumentno + msg;
 		}
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
 		set_Value("SRI_Authorization_ID",autorizationID);
