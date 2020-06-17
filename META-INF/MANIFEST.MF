@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: FE-EC
+Bundle-SymbolicName: com.ingeint.fe-ec
 Bundle-Version: 7.1.0.qualifier
 Bundle-Vendor: INGEINT SA
 Bundle-ActivationPolicy: lazy
@@ -45,3 +45,4 @@ Bundle-ClassPath: lib/bcmail-jdk16-1.45.jar,
  lib/org.apache.karaf.specs.java.xml.ws-4.2.7.jar,
  .
 Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator
+Bundle-Name: com.ingeint.fe-ec
