@@ -9,6 +9,7 @@ import org.compiere.model.MMovement;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.process.ProcessInfoParameter;
+import org.compiere.process.SvrProcess;
 import org.globalqss.model.LEC_FE_MInOut;
 import org.globalqss.model.LEC_FE_MInvoice;
 import org.globalqss.model.LEC_FE_MNotaCredito;
@@ -17,16 +18,15 @@ import org.globalqss.model.LEC_FE_MRetencion;
 import org.globalqss.model.LEC_FE_Movement;
 import org.globalqss.model.X_SRI_Authorization;
 
-import ec.ingeint.erp.base.CustomProcess;
 import ec.ingeint.erp.model.LEC_FE_MInvoicePL;
 
-public class SRIGeneateOffLineAutForDocument extends CustomProcess {
+public class SRIGeneateOffLineAutForDocument extends SvrProcess {
 
 	String table = "";
 	Integer C_Invoice_ID;
 	Integer M_InOut_ID;
 	Integer M_Movement_ID;
-
+		
 	@Override
 	protected void prepare() {
 		{

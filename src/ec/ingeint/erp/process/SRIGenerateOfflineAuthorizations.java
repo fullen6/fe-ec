@@ -36,6 +36,7 @@ import org.compiere.model.MMovement;
 import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.process.ProcessInfoParameter;
+import org.compiere.process.SvrProcess;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.globalqss.model.LEC_FE_MInOut;
@@ -47,7 +48,6 @@ import org.globalqss.model.LEC_FE_ModelValidator;
 import org.globalqss.model.LEC_FE_Movement;
 import org.globalqss.model.X_SRI_Authorization;
 
-import ec.ingeint.erp.base.CustomProcess;
 import ec.ingeint.erp.model.LEC_FE_MInvoicePL;
 
 /**
@@ -55,7 +55,7 @@ import ec.ingeint.erp.model.LEC_FE_MInvoicePL;
  * 
  * @author GlobalQSS/jjgq
  */
-public class SRIGenerateOfflineAuthorizations extends CustomProcess {
+public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 
 	/** Number of authorizations */
 	private int m_created = 0;
