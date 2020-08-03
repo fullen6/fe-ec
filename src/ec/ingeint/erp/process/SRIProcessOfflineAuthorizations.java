@@ -30,7 +30,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;
@@ -41,7 +40,6 @@ import org.compiere.model.MProcess;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfo;
 import org.compiere.process.ProcessInfoParameter;
-import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
@@ -50,12 +48,14 @@ import org.globalqss.model.X_SRI_Authorization;
 import org.globalqss.util.LEC_FE_Utils;
 import org.globalqss.util.LEC_FE_UtilsXml;
 
+import ec.ingeint.erp.base.CustomProcess;
+
 /**
  *	Generate Contingency Authorizations
  *	
  *  @author INGEINT/ocurieles
  */
-public class SRIProcessOfflineAuthorizations extends SvrProcess
+public class SRIProcessOfflineAuthorizations extends CustomProcess
 {
 
 	/**	Client							*/
