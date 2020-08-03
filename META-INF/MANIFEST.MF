@@ -46,3 +46,6 @@ Bundle-ClassPath: lib/bcmail-jdk16-1.45.jar,
  .
 Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator
 Bundle-Name: com.ingeint.fe-ec
+Export-Package: ec.ingeint.erp.model,
+ org.globalqss.model,
+ org.globalqss.util
