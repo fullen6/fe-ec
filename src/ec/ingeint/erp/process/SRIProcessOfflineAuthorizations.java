@@ -103,6 +103,7 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 	 */
 	protected String doIt () throws Exception
 	{
+		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 		log.info("SRI_Authorization_ID=" + p_SRI_Authorization_ID);
 		//
 		String sql = null;
@@ -141,6 +142,7 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 	 */
 	private String generate (PreparedStatement pstmt)
 	{
+		
 		String msg = null;
 		try
 		{

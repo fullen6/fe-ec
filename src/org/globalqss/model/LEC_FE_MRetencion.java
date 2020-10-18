@@ -387,6 +387,23 @@ public class LEC_FE_MRetencion extends MInvoice {
 				}
 
 				mmDoc.endElement("", "", "impuestos");
+				
+				if (oi.get_ValueAsBoolean("IsWithholdingAgent")) {
+					
+					mmDoc.startElement("", "", "detallesAdicionales", atts);
+					mmDoc.startElement("", "", "detAdicional", atts);
+			
+					
+					atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retencion");
+					mmDoc.startElement("", "", "campoAdicional", atts);
+					String valoroc = LEC_FE_Utils.cutString(oi.get_ValueAsString("WithholdingResolution"), 300);
+					mmDoc.characters(valoroc.toCharArray(), 0, valoroc.length());
+					mmDoc.endElement("", "", "campoAdicional");
+					
+					mmDoc.endElement("", "", "detAdicional");
+					mmDoc.endElement("", "", "detallesAdicionales");
+
+				}
 
 				rs.close();
 				pstmt.close();
@@ -397,18 +414,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 				msg = "Error SQL: " + sql.toString();
 				return ErrorDocumentno + msg;
 			}
-			/*
-			 * if (getDescription() != null) {
-			 * mmDoc.startElement("","","infoAdicional",atts);
-			 * 
-			 * atts.clear(); atts.addAttribute("", "", "nombre", "CDATA", "descripcion2");
-			 * mmDoc.startElement("", "", "campoAdicional", atts); String valor =
-			 * LEC_FE_Utils.cutString(getDescription(),300);
-			 * mmDoc.characters(valor.toCharArray(), 0, valor.length());
-			 * mmDoc.endElement("","","campoAdicional");
-			 * 
-			 * mmDoc.endElement("","","infoAdicional"); }
-			 */
+
 			mmDoc.endElement("", "", f.get_ValueAsString("XmlPrintLabel"));
 
 			mmDoc.endDocument();

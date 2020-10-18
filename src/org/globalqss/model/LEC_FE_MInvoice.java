@@ -739,7 +739,17 @@ public class LEC_FE_MInvoice extends MInvoice {
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
 			}
+			
+			if (oi.get_ValueAsBoolean("IsWithholdingAgent")) {
+				
+				atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retencion");
+				mmDoc.startElement("", "", "campoAdicional", atts);
+				String valoroc = LEC_FE_Utils.cutString(oi.get_ValueAsString("WithholdingResolution"), 300);
+				mmDoc.characters(valoroc.toCharArray(), 0, valoroc.length());
+				mmDoc.endElement("", "", "campoAdicional");
 
+			}
+			
 			if (getPOReference() != null && !getPOReference().trim().isEmpty()) {
 
 				atts.addAttribute("", "", "nombre", "CDATA", "Orden de Compra");
@@ -783,7 +793,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
 			}
-
+			
 			String totalguides = LEC_FE_Utils.allguides(getC_Invoice_ID(), get_TrxName(), 0);
 			if (!totalguides.equals("-")) {
 				atts.addAttribute("", "", "nombre", "CDATA", "Guias de Remision:");
