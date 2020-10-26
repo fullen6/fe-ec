@@ -742,27 +742,21 @@ public class LEC_FE_MInvoice extends MInvoice {
 			
 			if (oi.get_ValueAsBoolean("IsMicroBusiness")) {
 
-				mmDoc.startElement("", "", "infoAdicional", atts);
-				atts.clear();
 				atts.addAttribute("", "", "nombre", "CDATA", "Regimen");
 				mmDoc.startElement("", "", "campoAdicional", atts);
 				valor = "Contribuyente Régimen Microempresas";
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
-				mmDoc.endElement("", "", "infoAdicional");
 
 			}
 			
 			if (oi.get_ValueAsBoolean("IsWithholdingAgent")) {
 				
-				mmDoc.startElement("", "", "infoAdicional", atts);
-				atts.clear();
 				atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retención");
 				mmDoc.startElement("", "", "campoAdicional", atts);
 				valor = oi.get_ValueAsString("WithholdingResolution");
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
-				mmDoc.endElement("", "", "infoAdicional");
 				
 			}
 			
