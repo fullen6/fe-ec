@@ -80,7 +80,7 @@ public class LEC_FE_ProcessFactory implements IProcessFactory {
 		else if (SRIProcessOfflineAuthorizations.class.getCanonicalName().equals(className)) {
 			try {
 				process = SRIProcessOfflineAuthorizations.class.getConstructor().newInstance();
-			} catch (Exception e) {}
+			} catch (Exception e) {}				
 		}
 		else if (SRIGeneateOffLineAutForDocument.class.getCanonicalName().equals(className)) {
 			try {
