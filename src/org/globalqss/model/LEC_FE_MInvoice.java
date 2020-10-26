@@ -740,14 +740,30 @@ public class LEC_FE_MInvoice extends MInvoice {
 				mmDoc.endElement("", "", "campoAdicional");
 			}
 			
+			if (oi.get_ValueAsBoolean("IsMicroBusiness")) {
+
+				mmDoc.startElement("", "", "infoAdicional", atts);
+				atts.clear();
+				atts.addAttribute("", "", "nombre", "CDATA", "Regimen");
+				mmDoc.startElement("", "", "campoAdicional", atts);
+				valor = "Contribuyente Régimen Microempresas";
+				mmDoc.characters(valor.toCharArray(), 0, valor.length());
+				mmDoc.endElement("", "", "campoAdicional");
+				mmDoc.endElement("", "", "infoAdicional");
+
+			}
+			
 			if (oi.get_ValueAsBoolean("IsWithholdingAgent")) {
 				
-				atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retencion");
+				mmDoc.startElement("", "", "infoAdicional", atts);
+				atts.clear();
+				atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retención");
 				mmDoc.startElement("", "", "campoAdicional", atts);
-				String valoroc = LEC_FE_Utils.cutString(oi.get_ValueAsString("WithholdingResolution"), 300);
-				mmDoc.characters(valoroc.toCharArray(), 0, valoroc.length());
+				valor = oi.get_ValueAsString("WithholdingResolution");
+				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
-
+				mmDoc.endElement("", "", "infoAdicional");
+				
 			}
 			
 			if (getPOReference() != null && !getPOReference().trim().isEmpty()) {

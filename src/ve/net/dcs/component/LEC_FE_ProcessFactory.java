@@ -13,6 +13,9 @@ import org.globalqss.process.SRIProcessBatchWithholdings;
 import org.globalqss.process.SRIReprocessAuthorization;
 
 import ec.ingeint.erp.process.LEC_InvoiceGenerate;
+import ec.ingeint.erp.process.SRIGeneateOffLineAutForDocument;
+import ec.ingeint.erp.process.SRIGenerateOfflineAuthorizations;
+import ec.ingeint.erp.process.SRIProcessOfflineAuthorizations;
 
 public class LEC_FE_ProcessFactory implements IProcessFactory {
 
@@ -67,6 +70,21 @@ public class LEC_FE_ProcessFactory implements IProcessFactory {
 		else if (LEC_InvoiceGenerate.class.getCanonicalName().equals(className)) {
 			try {
 				process =  LEC_InvoiceGenerate.class.getConstructor().newInstance();
+			} catch (Exception e) {}
+		}
+		else if (SRIGenerateOfflineAuthorizations.class.getCanonicalName().equals(className)) {
+			try {
+				process = SRIGenerateOfflineAuthorizations.class.getConstructor().newInstance();
+			} catch (Exception e) {}
+		}
+		else if (SRIProcessOfflineAuthorizations.class.getCanonicalName().equals(className)) {
+			try {
+				process = SRIProcessOfflineAuthorizations.class.getConstructor().newInstance();
+			} catch (Exception e) {}
+		}
+		else if (SRIGeneateOffLineAutForDocument.class.getCanonicalName().equals(className)) {
+			try {
+				process = SRIGeneateOffLineAutForDocument.class.getConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 		return process;

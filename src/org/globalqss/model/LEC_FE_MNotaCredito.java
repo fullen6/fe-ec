@@ -545,6 +545,33 @@ public class LEC_FE_MNotaCredito extends MInvoice
 			}
 
 			mmDoc.endElement("","","detalles");
+			
+			if (oi.get_ValueAsBoolean("IsMicroBusiness")) {
+
+				mmDoc.startElement("", "", "infoAdicional", atts);
+				atts.clear();
+				atts.addAttribute("", "", "nombre", "CDATA", "Regimen");
+				mmDoc.startElement("", "", "campoAdicional", atts);
+				String valor = "Contribuyente Regimen Microempresas";
+				mmDoc.characters(valor.toCharArray(), 0, valor.length());
+				mmDoc.endElement("", "", "campoAdicional");
+				mmDoc.endElement("", "", "infoAdicional");
+
+			}
+			
+			if (oi.get_ValueAsBoolean("IsWithholdingAgent")) {
+				
+				mmDoc.startElement("", "", "infoAdicional", atts);
+				atts.clear();
+				atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retencion");
+				mmDoc.startElement("", "", "campoAdicional", atts);
+				String valor = oi.get_ValueAsString("WithholdingResolution");
+				mmDoc.characters(valor.toCharArray(), 0, valor.length());
+				mmDoc.endElement("", "", "campoAdicional");
+				mmDoc.endElement("", "", "infoAdicional");
+				
+			}
+			
 			/*
 		if (getDescription() != null)  {
 			mmDoc.startElement("","","infoAdicional",atts);
