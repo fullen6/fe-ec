@@ -63,7 +63,6 @@ public class LEC_FE_MInvoice extends MInvoice {
 	private String m_identificacioncomprador = "";
 	private String m_razonsocial = "";
 	private boolean isInternal = false;
-	private boolean IsGenerateInBatch = false;
 
 	private BigDecimal m_totaldescuento = Env.ZERO;
 	private BigDecimal m_totalbaseimponible = Env.ZERO;
@@ -93,7 +92,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 		try {
 			log.warning("Documento a procesar: " + getDocumentNo());
-			//log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
+			// log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
 			signature.setAD_Org_ID(getAD_Org_ID());
 			m_identificacionconsumidor = MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null,
 					getAD_Client_ID());
@@ -114,8 +113,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			m_coddoc = dt.get_ValueAsString("SRI_ShortDocType");
 
 			if (m_coddoc.equals(""))
-				return ErrorDocumentno + "No existe definicion SRI_ShortDocType: "
-						+ dt.toString();
+				return ErrorDocumentno + "No existe definicion SRI_ShortDocType: " + dt.toString();
 
 			// Formato
 			m_lec_sri_format_id = LEC_FE_Utils.getLecSriFormat(getAD_Client_ID(), signature.getDeliveredType(),
@@ -211,13 +209,15 @@ public class LEC_FE_MInvoice extends MInvoice {
 			ac.setCodeAccessType(signature.getCodeAccessType());
 			ac.setSRI_ShortDocType(m_coddoc);
 			ac.setIsUsed(true);
-
-			// Access Code
-			m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-					oi.get_ValueAsString("SRI_OrgCode"),
-					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), getDocumentNo(),
-					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
-
+			
+			 // Access Code
+            m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
+                    //oi.get_ValueAsString("SRI_OrgCode"), 
+                    LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
+                    LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
+                    getDocumentNo(),
+                    oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
+            
 			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
 				ac.setValue(m_accesscode);
 
@@ -739,7 +739,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
 			}
-			
+
 			if (oi.get_ValueAsBoolean("IsMicroBusiness")) {
 
 				atts.addAttribute("", "", "nombre", "CDATA", "Regimen");
@@ -749,17 +749,17 @@ public class LEC_FE_MInvoice extends MInvoice {
 				mmDoc.endElement("", "", "campoAdicional");
 
 			}
-			
+
 			if (oi.get_ValueAsBoolean("IsWithholdingAgent")) {
-				
+
 				atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retención");
 				mmDoc.startElement("", "", "campoAdicional", atts);
 				valor = oi.get_ValueAsString("WithholdingResolution");
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
-				
+
 			}
-			
+
 			if (getPOReference() != null && !getPOReference().trim().isEmpty()) {
 
 				atts.addAttribute("", "", "nombre", "CDATA", "Orden de Compra");
@@ -803,7 +803,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
 			}
-			
+
 			String totalguides = LEC_FE_Utils.allguides(getC_Invoice_ID(), get_TrxName(), 0);
 			if (!totalguides.equals("-")) {
 				atts.addAttribute("", "", "nombre", "CDATA", "Guias de Remision:");
@@ -974,26 +974,22 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesFirmados);
 
-			if (dt.get_Value("IsGenerateInBatch") != null)
-				IsGenerateInBatch = dt.get_ValueAsBoolean("IsGenerateInBatch");
-
 			// Procesar Recepcion SRI
 			log.warning("@Sending Xml@ -> " + file_name);
 			msg = signature.respuestaRecepcionComprobante(file_name);
 
 			if (msg != null)
-
-				if (msg.contains("ERROR-65"))
+				if (msg.contains("ERROR-65")) {
 					DB.executeUpdateEx(
 							"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
 							new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
-				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
+				} else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 					String invoiceNo = getDocumentNo();
 					String invoiceID = String.valueOf(get_ID());
 					a.setDescription(invoiceNo);
 					a.set_ValueOfColumn("DocumentID", invoiceID);
 					a.set_ValueOfColumn("C_Invoice_ID", get_ID());
-					a.saveEx();
+					//a.saveEx();
 					set_Value("SRI_Authorization_ID", a.get_ID());
 					this.saveEx();
 					return msg;
@@ -1051,7 +1047,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 		}
 		set_Value("SRI_Authorization_ID", a.get_ID());
 		this.saveEx();
-		
+
 		return msg;
 
 	} // lecfeinv_SriExportInvoiceXML100

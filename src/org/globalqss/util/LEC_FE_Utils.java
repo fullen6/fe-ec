@@ -171,69 +171,64 @@ public class LEC_FE_Utils {
 	 * @return string
 	 */
 	public static String getSecuencial(String docno, String shortdoctype) {
-		if (shortdoctype.equals("01")) // FACTURA
-			return new String(docno.substring(docno.lastIndexOf('-') + 1));
-		else if (shortdoctype.equals("03")) // LIQUIDACION DE COMPRAS
-			return new String(docno.substring(docno.lastIndexOf('-') + 1));
-		else if (shortdoctype.equals("04")) // NOTA DE CRÉDITO
-			return new String(docno.substring(docno.lastIndexOf('-') + 1));
-		else if (shortdoctype.equals("05")) // NOTA DE DÉBITO
-			return new String(docno.substring(docno.lastIndexOf('-') + 1));
-		else if (shortdoctype.equals("06")) // GUÍA DE REMISIÓN
-			return new String(docno.substring(docno.lastIndexOf('-') + 1));
-		else if (shortdoctype.equals("07")) // COMPROBANTE DE RETENCIÓN
-			return new String(docno.substring(docno.lastIndexOf('-') + 1));
-
-		return new String(docno.trim());
-	}
+		 if (shortdoctype.equals("01")) {
+	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
+	        }
+	        if (shortdoctype.equals("04")) {
+	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
+	        }
+	        if (shortdoctype.equals("05")) {
+	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
+	        }
+	        if (shortdoctype.equals("06")) {
+	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
+	        }
+	        if (shortdoctype.equals("07")) {
+	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
+	        }
+	        return new String(docno.trim());
+	    }
 
 	/**
 	 * String getSecuencial from DocumentNo
 	 * 
 	 * @return string
 	 */
-	public static String formatDocNo(String docno, String shortdoctype) {
-
-		// SRI Longitud valida 15 Digits, 17 con guiones
-		String doc17Sri = "";
-
-		try {
-
-			if (docno.trim().length() < 17) {
-				doc17Sri = docno.substring(0, 3);
-				if (docno.lastIndexOf('-') == -1) // 0 Guion
-					doc17Sri = doc17Sri + docno.substring(0, 6) + "-";
-				else if (docno.lastIndexOf('-') == 3) // 1 Guion
-					doc17Sri = doc17Sri + docno.substring(3, 7) + "-";
-				else if (docno.lastIndexOf('-') == 6) // 1 Guion
-					doc17Sri = doc17Sri + "-" + docno.substring(3, 5);
-				else if (docno.lastIndexOf('-') == 7) // 2 Guiones
-					doc17Sri = doc17Sri + docno.substring(3, 8);
-				else
-					doc17Sri = docno.substring(0, 6);
-
-				doc17Sri = doc17Sri + LEC_FE_Utils.fillString(
-						9 - (LEC_FE_Utils.cutString(LEC_FE_Utils.getSecuencial(docno, shortdoctype), 9)).length(), '0')
-						+ LEC_FE_Utils.cutString(LEC_FE_Utils.getSecuencial(docno, shortdoctype), 9);
-			} else
-				doc17Sri = docno;
-
-		} catch (Exception e) {
-			// TODO Crear aviso del error
-			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_NotANumber"));
-		}
-
-		doc17Sri = LEC_FE_Utils.cutString(doc17Sri.trim(), 17);
-
-		if (doc17Sri.length() != 17) {
-
-			// TODO Crear aviso del error
-			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_WrongLength"));
-
-		}
-
-		return doc17Sri;
-	}
+	public static String formatDocNo(final String docno, final String shortdoctype) {
+        String doc17Sri = "";
+        try {
+            if (docno.trim().length() < 17) {
+                doc17Sri = docno.substring(0, 3);
+                if (docno.lastIndexOf(45) == -1) {
+                    doc17Sri = String.valueOf(doc17Sri) + docno.substring(0, 6) + "-";
+                }
+                else if (docno.lastIndexOf(45) == 3) {
+                    doc17Sri = String.valueOf(doc17Sri) + docno.substring(3, 7) + "-";
+                }
+                else if (docno.lastIndexOf(45) == 6) {
+                    doc17Sri = String.valueOf(doc17Sri) + "-" + docno.substring(3, 5);
+                }
+                else if (docno.lastIndexOf(45) == 7) {
+                    doc17Sri = String.valueOf(doc17Sri) + docno.substring(3, 8);
+                }
+                else {
+                    doc17Sri = docno.substring(0, 6);
+                }
+                doc17Sri = String.valueOf(doc17Sri) + fillString(9 - cutString(getSecuencial(docno, shortdoctype), 9).length(), '0') + cutString(getSecuencial(docno, shortdoctype), 9);
+            }
+            else {
+                doc17Sri = docno;
+            }
+        }
+        catch (Exception ex) {
+            throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_NotANumber"));
+        }
+        doc17Sri = cutString(doc17Sri.trim(), 17);
+        if (doc17Sri.length() != 17) {
+            throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_WrongLength"));
+        }
+        return doc17Sri;
+    }
 
 	/**
 	 * String replaceGuion from DocumentNo
@@ -716,5 +711,10 @@ public class LEC_FE_Utils {
 		else
 			return allguides.toString();
 	}
+	
+    public static String getOrgCode(final String docno) {
+        return new String(docno.substring(0, 3));
+    }
+
 
 } // LEC_FE_Utils

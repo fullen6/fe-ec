@@ -153,6 +153,7 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 				msg= "";
 				X_SRI_Authorization authorization = new X_SRI_Authorization (getCtx(), rs, get_TrxName());
+				log.warning("To Process: "+authorization.get_ValueAsInt("Value"));
 
 				// isSOTrx()
 				if (authorization.getSRI_ShortDocType().equals("01"))	// FACTURA
