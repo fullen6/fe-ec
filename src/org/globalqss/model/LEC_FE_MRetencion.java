@@ -80,7 +80,8 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 	public String lecfeinvret_SriExportRetencionXML100() {
 		String msgStatus = "";
-		int autorizationID = 0;
+		X_SRI_Authorization a = null;
+
 		String msg = null;
 		String ErrorDocumentno = "Error en Retención No " + getDocumentNo() + " ";
 
@@ -204,7 +205,6 @@ public class LEC_FE_MRetencion extends MInvoice {
 			}
 
 			// New Authorization
-			X_SRI_Authorization a = null;
 			a = new X_SRI_Authorization(getCtx(), 0, get_TrxName());
 			a.setAD_Org_ID(getAD_Org_ID());
 			a.setSRI_ShortDocType(m_coddoc);
@@ -215,13 +215,6 @@ public class LEC_FE_MRetencion extends MInvoice {
 			a.setAD_UserMail_ID(getAD_User_ID());
 			a.set_ValueOfColumn("isSRIOfflineSchema", isOfflineSchema);
 			a.set_ValueOfColumn("C_Invoice_ID", getC_Invoice_ID());
-
-			if (!a.save()) {
-				msg = "@SaveError@ No se pudo grabar SRI Autorizacion";
-				return ErrorDocumentno + msg;
-			}
-
-			autorizationID = a.get_ID();
 
 			OutputStream mmDocStream = null;
 
@@ -559,8 +552,8 @@ public class LEC_FE_MRetencion extends MInvoice {
 		}
 
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
-
-		set_Value("SRI_Authorization_ID", autorizationID);
+		a.saveEx();
+		set_Value("SRI_Authorization_ID", a.get_ID());
 		this.saveEx();
 
 		return msg;

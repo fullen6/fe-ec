@@ -334,7 +334,7 @@ public class LEC_FE_Utils {
 	public static int getAuthorisedInvoice(int sri_authosisation_id) {
 
 		int c_invoice_authorised_id = DB.getSQLValue(null,
-				"SELECT COALESCE(MAX(i.C_Invoice_ID), -1) FROM C_Invoice i WHERE i.SRI_Authorization_ID = ? ",
+				"SELECT COALESCE(MAX(i.C_Invoice_ID), -1) FROM C_Invoice i WHERE i.SRI_Authorization_ID = ?  AND DocStatus in ('CO', 'CL') ",
 				sri_authosisation_id);
 
 		return c_invoice_authorised_id;
