@@ -284,7 +284,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 			// Numerico2
 			addHeaderElement(mmDoc, "codDoc", m_coddoc, atts);
 			// Numerico3
-			addHeaderElement(mmDoc, "estab", oi.get_ValueAsString("SRI_OrgCode"), atts);
+			addHeaderElement(mmDoc, "estab", getDocumentNo().substring(0, 3), atts);
 			// Numerico3
 			addHeaderElement(mmDoc, "ptoEmi",
 					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(m_retencionno, m_coddoc)), atts);
