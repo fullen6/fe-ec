@@ -206,10 +206,6 @@ public class LEC_FE_MInOut extends MInOut {
 			if (m_c_invoice_sus_id > 0) {
 				invsus = new MInvoice(getCtx(), m_c_invoice_sus_id, get_TrxName());
 				if (invsus.get_Value("SRI_Authorization_ID") != null)
-					// log.warning("No existe documento sustento autorizado para el comprobante");
-					// // TODO Reviewme
-					// return ErrorDocumentno+"No existe documento sustento autorizado para el
-					// comprobante";
 					asus = new X_SRI_Authorization(getCtx(), (Integer) invsus.get_Value("SRI_Authorization_ID"),
 							get_TrxName());
 			}
@@ -244,8 +240,8 @@ public class LEC_FE_MInOut extends MInOut {
 			ac.setIsUsed(true);
 
 			// Access Code
-			m_accesscode = LEC_FE_Utils.getAccessCode(datets, m_coddoc, bpe.getTaxID(),
-					oi.get_ValueAsString("SRI_OrgCode"),
+			m_accesscode = LEC_FE_Utils.getAccessCode(getMovementDate(), m_coddoc, bpe.getTaxID(),
+					LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)),
 					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), getDocumentNo(),
 					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
 

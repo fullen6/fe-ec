@@ -177,9 +177,10 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 
 			// Access Code
 			m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-					oi.get_ValueAsString("SRI_OrgCode"),
-					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), getDocumentNo(),
-					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
+					LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
+	                  LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
+	                  getDocumentNo(),
+	                  oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
 
 			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
 				ac.setValue(m_accesscode);
