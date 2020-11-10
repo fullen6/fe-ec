@@ -195,7 +195,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 					oi.get_ValueAsString("SRI_OrgCode"),
 					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(m_retencionno, m_coddoc)), m_retencionno,
 					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
-
+			
 			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
 				ac.setValue(m_accesscode);
 
