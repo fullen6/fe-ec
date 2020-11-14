@@ -175,12 +175,13 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			ac.setSRI_ShortDocType(m_coddoc);
 			ac.setIsUsed(true);
 
-			// Access Code
-			m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-					LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-	                  LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-	                  getDocumentNo(),
-	                  oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
+			 // Access Code
+            m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
+                    //oi.get_ValueAsString("SRI_OrgCode"), 
+                    LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
+                    LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
+                    getDocumentNo(),
+                    oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
 
 			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
 				ac.setValue(m_accesscode);
@@ -264,7 +265,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			// Numerico2
 			addHeaderElement(mmDoc, "codDoc", m_coddoc, atts);
 			// Numerico3
-			addHeaderElement(mmDoc, "estab", oi.get_ValueAsString("SRI_OrgCode"), atts);
+			addHeaderElement(mmDoc, "estab", getDocumentNo().substring(0, 3), atts);
 			// Numerico3
 			addHeaderElement(mmDoc, "ptoEmi",
 					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), atts);
