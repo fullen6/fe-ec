@@ -174,6 +174,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			ac.setCodeAccessType(signature.getCodeAccessType());
 			ac.setSRI_ShortDocType(m_coddoc);
 			ac.setIsUsed(true);
+			ac.saveEx();
 
 			 // Access Code
             m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),

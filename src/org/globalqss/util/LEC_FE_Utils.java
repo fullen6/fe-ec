@@ -186,6 +186,9 @@ public class LEC_FE_Utils {
 	        if (shortdoctype.equals("07")) {
 	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
 	        }
+	        if (shortdoctype.equals("03")) {
+	        	return new String(docno.substring(docno.lastIndexOf(45) + 1));
+	        }
 	        return new String(docno.trim());
 	    }
 
