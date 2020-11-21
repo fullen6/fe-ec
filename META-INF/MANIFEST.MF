@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.ingeint.fe-ec
-Bundle-Version: 8.2.0.qualifier
+Bundle-Version: 8.1.0.qualifier
 Bundle-Vendor: INGEINT SA
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.adempiere.base;bundle-version="8.1.0",
