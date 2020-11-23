@@ -282,7 +282,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 			// Numérico49
 			addHeaderElement(mmDoc, "claveAcceso", a.getValue(), atts);
 			// Numerico2
-			addHeaderElement(mmDoc, "codDoc", m_coddoc, atts);
+			addHeaderElement(mmDoc, "estab", oi.get_ValueAsString("SRI_OrgCode"), atts);
 			// Numerico3
 			addHeaderElement(mmDoc, "estab", getDocumentNo().substring(0, 3), atts);
 			// Numerico3
