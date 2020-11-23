@@ -209,15 +209,14 @@ public class LEC_FE_MInvoice extends MInvoice {
 			ac.setCodeAccessType(signature.getCodeAccessType());
 			ac.setSRI_ShortDocType(m_coddoc);
 			ac.setIsUsed(true);
-			
-			 // Access Code
-            m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-                    //oi.get_ValueAsString("SRI_OrgCode"), 
-                    LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-                    LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-                    getDocumentNo(),
-                    oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
-            
+
+			// Access Code
+			m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
+					// oi.get_ValueAsString("SRI_OrgCode"),
+					LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)),
+					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), getDocumentNo(),
+					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
+
 			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
 				ac.setValue(m_accesscode);
 
@@ -562,10 +561,12 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			if (rows == 0) {
 				MPaymentTerm paymentTerm = (MPaymentTerm) getC_PaymentTerm();
+
 				mmDoc.startElement("", "", "pago", atts);
 				addHeaderElement(mmDoc, "formaPago", invoice.get_ValueAsString("LEC_PaymentMethod"), atts);
 				addHeaderElement(mmDoc, "total", getGrandTotal().toString(), atts);
-				addHeaderElement(mmDoc, "plazo", String.valueOf(paymentTerm.getNetDays()), atts);
+				addHeaderElement(mmDoc, "plazo",
+						String.valueOf(paymentTerm.getNetDays() < 0 ? 0 : paymentTerm.getNetDays()), atts);
 				addHeaderElement(mmDoc, "unidadTiempo", "dias", atts);
 				mmDoc.endElement("", "", "pago");
 
@@ -580,6 +581,9 @@ public class LEC_FE_MInvoice extends MInvoice {
 					long Daysms = 0;
 					Daysms = (ipss[i].getDueDate().getTime() - invoice.getDateAcct().getTime());
 					long NetDays = Daysms / (1000 * 60 * 60 * 24);
+					if (NetDays < 0) {
+						NetDays = 0;
+					}
 					addHeaderElement(mmDoc, "plazo", LEC_FE_Utils.cutString(String.valueOf(NetDays), 14), atts);
 					addHeaderElement(mmDoc, "unidadTiempo", "dias", atts);
 					mmDoc.endElement("", "", "pago");
@@ -989,7 +993,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 					a.setDescription(invoiceNo);
 					a.set_ValueOfColumn("DocumentID", invoiceID);
 					a.set_ValueOfColumn("C_Invoice_ID", get_ID());
-					//a.saveEx();
+					// a.saveEx();
 					set_Value("SRI_Authorization_ID", a.get_ID());
 					this.saveEx();
 					return msg;
