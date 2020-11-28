@@ -111,7 +111,8 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 				+ " WHERE AD_Client_ID= ? "
 				+ "  AND IsActive = 'Y' AND Processed = 'N' "
 				+ "  AND isSRIOfflineSchema = 'Y' "
-				+ "  AND IsSRI_Error = 'N' ";
+				+ "  AND IsSRI_Error = 'N' "
+				+ "  AND IsToSend = 'N' ";
 		if (p_SRI_Authorization_ID != 0)
 			sql += " AND SRI_Authorization_ID= ? ";
 

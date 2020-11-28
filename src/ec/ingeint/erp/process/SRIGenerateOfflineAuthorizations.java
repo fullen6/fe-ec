@@ -97,11 +97,13 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 			//
 			String sql = null;
 
-			sql = "SELECT * FROM " + table + " a " + " JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
-					+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
-					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus = 'CO' "
-					+ " AND a.SRI_Authorization_ID is null " + " AND a.issri_error = 'N' "
-					+ " AND dt.sri_shortdoctype notnull  ";
+			sql = "SELECT * "
+					+ "FROM " + table + " a "
+							+ "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
+							+ "JOIN SRI_Authorization au on au.SRI_Authorization_ID = a.SRI_Authorization_ID "
+							+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
+							+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus = 'CO' "
+							+ " AND a.issri_error = 'N' AND dt.sri_shortdoctype notnull AND au.IsToSend = 'Y' ";
 
 			PreparedStatement pstmt = null;
 			try {

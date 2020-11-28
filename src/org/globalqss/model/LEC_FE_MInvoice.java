@@ -57,7 +57,6 @@ public class LEC_FE_MInvoice extends MInvoice {
 	private String file_name = "";
 	private String m_obligadocontabilidad = "NO";
 	private String m_coddoc = "";
-	private String m_accesscode;
 	private String m_identificacionconsumidor = "";
 	private String m_tipoidentificacioncomprador = "";
 	private String m_identificacioncomprador = "";
@@ -84,27 +83,21 @@ public class LEC_FE_MInvoice extends MInvoice {
 	}
 
 	public String lecfeinv_SriExportInvoiceXML100() {
+		
+		MInvoice invoice = new MInvoice(getCtx(), get_ID(), get_TrxName());
 		String msgStatus = "";
 		String msg = null;
-		X_SRI_Authorization a = null;
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), invoice.get_ValueAsInt("SRI_Authorization_ID"),
+				get_TrxName());
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 		String ErrorDocumentno = "Error en Factura No " + getDocumentNo() + " ";
 
 		try {
 			log.warning("Documento a procesar: " + getDocumentNo());
-			// log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
 			signature.setAD_Org_ID(getAD_Org_ID());
 			m_identificacionconsumidor = MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null,
 					getAD_Client_ID());
 			m_razonsocial = MSysConfig.getValue("QSSLEC_FE_RazonSocialPruebas", null, getAD_Client_ID());
-
-			signature.setPKCS12_Resource(
-					MSysConfig.getValue("QSSLEC_FE_RutaCertificadoDigital", null, getAD_Client_ID(), getAD_Org_ID()));
-			signature.setPKCS12_Password(
-					MSysConfig.getValue("QSSLEC_FE_ClaveCertificadoDigital", null, getAD_Client_ID(), getAD_Org_ID()));
-
-			if (signature.getFolderRaiz() == null)
-				return ErrorDocumentno + "No existe parametro para Ruta Generacion Xml";
 
 			MDocType dt = new MDocType(getCtx(), getC_DocTypeTarget_ID(), get_TrxName());
 			if (dt.get_Value("IsInternal") != null)
@@ -137,9 +130,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			int c_bpartner_id = LEC_FE_Utils.getOrgBPartner(getAD_Client_ID(), oi.get_ValueAsString("TaxID"));
 			MBPartner bpe = new MBPartner(getCtx(), c_bpartner_id, get_TrxName());
-
 			MLocation lo = new MLocation(getCtx(), oi.getC_Location_ID(), get_TrxName());
-
 			int c_location_matriz_id = MSysConfig.getIntValue("QSSLEC_FE_LocalizacionDireccionMatriz", -1,
 					oi.getAD_Client_ID());
 
@@ -199,49 +190,10 @@ public class LEC_FE_MInvoice extends MInvoice {
 							+ " No hay clave de contingencia para el comprobante";
 			}
 
-			// New/Upd Access Code
-
-			X_SRI_AccessCode ac = null;
-			ac = new X_SRI_AccessCode(getCtx(), sri_accesscode_id, get_TrxName());
-			ac.setAD_Org_ID(getAD_Org_ID());
-			ac.setOldValue(null); // Deprecated
-			ac.setEnvType(signature.getEnvType());
-			ac.setCodeAccessType(signature.getCodeAccessType());
-			ac.setSRI_ShortDocType(m_coddoc);
-			ac.setIsUsed(true);
-
-			// Access Code
-			m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-					// oi.get_ValueAsString("SRI_OrgCode"),
-					LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)),
-					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), getDocumentNo(),
-					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
-
-			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
-				ac.setValue(m_accesscode);
-
-			if (!ac.save()) {
-				msg = "@SaveError@ No se pudo grabar SRI Access Code";
-				return ErrorDocumentno + msg;
-			}
-
-			// New Authorization
-
-			a = new X_SRI_Authorization(getCtx(), 0, get_TrxName());
-
-			a.setAD_Org_ID(getAD_Org_ID());
-			a.setSRI_ShortDocType(m_coddoc);
-			a.setValue(m_accesscode);
-			a.setSRI_AccessCode_ID(ac.get_ID());
-			a.setSRI_ErrorCode_ID(0);
-			a.setAD_UserMail_ID(getAD_User_ID());
-			a.set_ValueOfColumn("isSRIOfflineSchema", isOfflineSchema);
-			a.set_ValueOfColumn("C_Invoice_ID", get_ID());
-
 			OutputStream mmDocStream = null;
 
 			String xmlFileName = "SRI_" + m_coddoc + "-" + LEC_FE_Utils.getDate(getDateInvoiced(), 9) + "-"
-					+ m_accesscode + ".xml";
+					+ a.getValue() + ".xml";
 
 			// ruta completa del archivo xml
 			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesGenerados
@@ -555,7 +507,6 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			MInvoicePaySchedule[] ipss = MInvoicePaySchedule.getInvoicePaySchedule(getCtx(), get_ID(), 0,
 					get_TrxName());
-			MInvoice invoice = new MInvoice(getCtx(), get_ID(), get_TrxName());
 
 			int rows = ipss.length;
 
@@ -990,11 +941,6 @@ public class LEC_FE_MInvoice extends MInvoice {
 				} else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 					String invoiceNo = getDocumentNo();
 					String invoiceID = String.valueOf(get_ID());
-					a.setDescription(invoiceNo);
-					a.set_ValueOfColumn("DocumentID", invoiceID);
-					a.set_ValueOfColumn("C_Invoice_ID", get_ID());
-					// a.saveEx();
-					set_Value("SRI_Authorization_ID", a.get_ID());
 					this.saveEx();
 					return msg;
 				}
@@ -1027,11 +973,8 @@ public class LEC_FE_MInvoice extends MInvoice {
 				// TODO Agregar al OffLine el error Maybe ADNote
 				return ErrorDocumentno + msg;
 			}
-			String invoiceNo = getDocumentNo();
-			String invoiceID = String.valueOf(get_ID());
-			a.setDescription(invoiceNo);
-			a.set_ValueOfColumn("DocumentID", invoiceID);
-			a.set_ValueOfColumn("C_Invoice_ID", get_ID());
+			a.set_ValueOfColumn("IsToSend", true);
+			a.setSRI_AuthorizationCode(a.getValue());
 			a.saveEx();
 			msg = null;
 
@@ -1049,7 +992,6 @@ public class LEC_FE_MInvoice extends MInvoice {
 			msg = "No se pudo crear XML - Error en Conexion con el SRI";
 			return ErrorDocumentno + msg;
 		}
-		set_Value("SRI_Authorization_ID", a.get_ID());
 		this.saveEx();
 
 		return msg;
