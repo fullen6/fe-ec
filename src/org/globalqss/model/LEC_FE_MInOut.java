@@ -50,7 +50,6 @@ public class LEC_FE_MInOut extends MInOut {
 	 */
 	private static final long serialVersionUID = -924606040343895114L;
 
-	private int m_SRI_Authorization_ID = 0;
 	private int m_lec_sri_format_id = 0;
 	private int m_c_invoice_sus_id = 0;
 
@@ -76,7 +75,8 @@ public class LEC_FE_MInOut extends MInOut {
 
 	public String lecfeinout_SriExportInOutXML100() {
 		String msgStatus = "";
-		X_SRI_Authorization a = null;
+		MInOut inout = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), inout.get_ValueAsInt("SRI_Authorization_ID"), get_TrxName());
 		String msg = null;
 		String ErrorDocumentno = "Error en Entrega a Cliente No " + getDocumentNo() + " ";
 
@@ -213,57 +213,10 @@ public class LEC_FE_MInOut extends MInOut {
 			if (!isventamostrador && (getShipDate() == null || get_Value("ShipDateE") == null))
 				return ErrorDocumentno + "Debe indicar fechas de transporte";
 
-			// IsUseContingency
 			msgStatus = "AccessCode";
-			int sri_accesscode_id = 0;
-			if (signature.IsUseContingency) {
-				sri_accesscode_id = LEC_FE_Utils.getNextAccessCode(getAD_Client_ID(), signature.getEnvType(),
-						oi.getTaxID(), get_TrxName());
-				if (sri_accesscode_id < 1)
-					return ErrorDocumentno + "No hay clave de contingencia para el comprobante";
-			}
-
-			// New/Upd Access Code
-
-			// Se crea una transaccion nueva para la autorizacion y clave de acceso, para
-			// realizar un commit, en el
-			// caso de que se envie el comprobante y no se obtenga respuesta del SRI
-
+			
 			X_SRI_AccessCode ac = null;
-			ac = new X_SRI_AccessCode(getCtx(), sri_accesscode_id, get_TrxName());
-
-			ac.setAD_Org_ID(getAD_Org_ID());
-			ac.setOldValue(null); // Deprecated
-			ac.setEnvType(signature.getEnvType());
-			ac.setCodeAccessType(signature.getCodeAccessType());
-			ac.setSRI_ShortDocType(m_coddoc);
-			ac.setIsUsed(true);
-
-			// Access Code
-			m_accesscode = LEC_FE_Utils.getAccessCode(getMovementDate(), m_coddoc, bpe.getTaxID(),
-					LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)),
-					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), getDocumentNo(),
-					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
-
-			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
-				ac.setValue(m_accesscode);
-
-			if (!ac.save()) {
-				msg = "@SaveError@ No se pudo grabar SRI Access Code";
-				return ErrorDocumentno + msg;
-			}
-
-			// New Authorization
-			a = new X_SRI_Authorization(getCtx(), 0, get_TrxName());
-			a.setAD_Org_ID(getAD_Org_ID());
-			a.setSRI_ShortDocType(m_coddoc);
-			a.setValue(m_accesscode);
-			a.setSRI_AuthorizationCode(null);
-			a.setSRI_AccessCode_ID(ac.get_ID());
-			a.setSRI_ErrorCode_ID(0);
-			a.setAD_UserMail_ID(getAD_User_ID());
-			a.set_ValueOfColumn("isSRIOfflineSchema", isOfflineSchema);
-			a.set_ValueOfColumn("M_InOut_ID", get_ID());
+			ac = new X_SRI_AccessCode(getCtx(), a.getSRI_AccessCode_ID(), get_TrxName());			
 
 			OutputStream mmDocStream = null;
 
@@ -303,12 +256,6 @@ public class LEC_FE_MInOut extends MInOut {
 			atts.clear();
 			atts.addAttribute("", "", "id", "CDATA", "comprobante");
 			atts.addAttribute("", "", "version", "CDATA", f.get_ValueAsString("VersionNo"));
-			// atts.addAttribute("", "", "xmlns:ds", "CDATA",
-			// "http://www.w3.org/2000/09/xmldsig#");
-			// atts.addAttribute("", "", "xmlns:xsi", "CDATA",
-			// "http://www.w3.org/2001/XMLSchema-instance");
-			// atts.addAttribute("", "", "xsi:noNamespaceSchemaLocation", "CDATA",
-			// f.get_ValueAsString("Url_Xsd"));
 			mmDoc.startElement("", "", f.get_ValueAsString("XmlPrintLabel"), atts);
 
 			atts.clear();
@@ -442,17 +389,7 @@ public class LEC_FE_MInOut extends MInOut {
 					addHeaderElement(mmDoc, "descripcion", LEC_FE_Utils.cutString(rs.getString(4), 300), atts);
 					// Numerico Max 14
 					addHeaderElement(mmDoc, "cantidad", rs.getBigDecimal(5).toString(), atts);
-					/*
-					 * if (rs.getString(6) != null) {
-					 * mmDoc.startElement("","","detallesAdicionales",atts);
-					 * 
-					 * atts.clear(); atts.addAttribute("", "", "nombre", "CDATA", "descripcion1");
-					 * atts.addAttribute("", "", "valor", "CDATA",
-					 * LEC_FE_Utils.cutString(rs.getString(6),300)); mmDoc.startElement("", "",
-					 * "detAdicional", atts); mmDoc.endElement("","","detAdicional");
-					 * 
-					 * mmDoc.endElement("","","detallesAdicionales"); }
-					 */
+
 					atts.clear();
 					//
 					mmDoc.endElement("", "", "detalle");
@@ -480,18 +417,7 @@ public class LEC_FE_MInOut extends MInOut {
 			mmDoc.endElement("", "", "destinatario");
 
 			mmDoc.endElement("", "", "destinatarios");
-			/*
-			 * if (getDescription() != null) {
-			 * mmDoc.startElement("","","infoAdicional",atts);
-			 * 
-			 * atts.clear(); atts.addAttribute("", "", "nombre", "CDATA", "descripcion2");
-			 * mmDoc.startElement("", "", "campoAdicional", atts); String valor =
-			 * LEC_FE_Utils.cutString(getDescription(),300);
-			 * mmDoc.characters(valor.toCharArray(), 0, valor.length());
-			 * mmDoc.endElement("","","campoAdicional");
-			 * 
-			 * mmDoc.endElement("","","infoAdicional"); }
-			 */
+
 			mmDoc.endElement("", "", f.get_ValueAsString("XmlPrintLabel"));
 
 			mmDoc.endDocument();
@@ -502,8 +428,6 @@ public class LEC_FE_MInOut extends MInOut {
 				} catch (Exception e2) {
 				}
 			}
-
-//		if (LEC_FE_Utils.breakDialog("Firmando Xml")) return "Cancelado...";	// TODO Temp
 
 			log.warning("@Signing Xml@ -> " + file_name);
 			signature.setResource_To_Sign(file_name);
@@ -528,29 +452,13 @@ public class LEC_FE_MInOut extends MInOut {
 								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
 								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
 					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
-						String invoiceNo = getDocumentNo();
-						String invoiceID = String.valueOf(get_ID());
-						a.setDescription(invoiceNo);
-						a.set_ValueOfColumn("DocumentID", invoiceID);
-						a.set_ValueOfColumn("M_InOut_ID", get_ID());
-						a.saveEx();
-						set_Value("SRI_Authorization_ID", a.get_ID());
 						this.saveEx();
 						return ErrorDocumentno + msg;
 					}
 
 				if (!msg.equals("RECIBIDA")) {
-					DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
-							get_TrxName());
 					return ErrorDocumentno + msg;
-				} else if (msg.equals("RECIBIDA")) {
-					String invoiceNo = getDocumentNo();
-					String invoiceID = String.valueOf(get_ID());
-					a.setDescription(invoiceNo);
-					a.set_ValueOfColumn("DocumentID", invoiceID);
-					a.saveEx();
-
-				}
+				} 
 
 				// 04/07/2016 MHG Offline Schema added
 				if (!isOfflineSchema) {
@@ -588,43 +496,6 @@ public class LEC_FE_MInOut extends MInOut {
 
 			}
 
-//	    if (MSysConfig.getBooleanValue("QSSLEC_FE_EnvioXmlAutorizadoBPEmail", false, getAD_Client_ID()))
-//		{
-//	    	try {
-//	    		List<File> attchs = new ArrayList<File>();
-//		    	File attachment = (new File (file_name));
-//		    	attchs.add(attachment);
-//		    	attchs.add(createPDF());
-//		    	
-//		    	if (attachment.exists() || attachment.isFile() || attachment.canRead()) {
-//		    		
-//			    	log.warning("@EMailing Xml@ -> " + file_name);
-//					// Enviar Email BPartner XML Autorizado
-//					MMailText mText = new MMailText(getCtx(), 0, get_TrxName());	// Solo en memoria
-//					mText.setPO(this);
-//					String subject = "SRI " + (signature.isOnTesting ? LEC_FE_UtilsXml.nombreCertificacion : LEC_FE_UtilsXml.nombreProduccion) + " " + bpe.getValue() + " : " + f.get_ValueAsString("XmlPrintLabel") + " " + getDocumentNo();
-//					String text =
-//							" Emisor               : " + bpe.getName() +
-//							"\nFecha                : " + LEC_FE_Utils.getDate(getMovementDate(),10) +
-//							"\nCliente              : " + bp.getName() +
-//							"\nComprobante          : " + f.get_ValueAsString("XmlPrintLabel") +
-//							"\nNumero               : " + getDocumentNo() +
-//							"\nAutorizacion No.     : " + a.getSRI_AuthorizationCode() +
-//							"\nFecha Autorizacion   : " + a.getSRI_AuthorizationDate() +
-//							"\nAdjunto              : " + file_name.substring(file_name.lastIndexOf(File.separator) + 1);
-//						
-//					int countMail = LEC_FE_Utils.notifyUsers(getCtx(), mText, getAD_User_ID(), subject, text, attchs, get_TrxName());
-//					if (countMail == 0)
-//						log.warning("@RequestActionEMailError@ -> " + file_name);
-//		    	}
-//	    	} catch (Exception ex) {
-//	        	// ignore exceptions
-//	        	log.warning(ex.getMessage());
-//			}
-//		}
-
-//		if (LEC_FE_Utils.breakDialog("Completando Entrega")) return "Cancelado...";	// TODO Temp
-
 			//
 		} catch (Exception e) {
 			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();
@@ -637,8 +508,6 @@ public class LEC_FE_MInOut extends MInOut {
 			return ErrorDocumentno + msg;
 		}
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
-		set_Value("SRI_Authorization_ID", a.get_ID());
-		this.saveEx();
 		return msg;
 
 	} // lecfeinout_SriExportInOutXML100

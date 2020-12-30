@@ -45,7 +45,6 @@ public class LEC_FE_MNotaCredito extends MInvoice
 	 */
 	private static final long serialVersionUID = -924606040343895114L;
 
-	private int		m_SRI_Authorization_ID = 0;
 	private int		m_lec_sri_format_id = 0;
 	private int		m_c_invoice_sus_id = 0;
 
@@ -64,22 +63,18 @@ public class LEC_FE_MNotaCredito extends MInvoice
 	private BigDecimal m_sumadescuento = Env.ZERO;
 	private BigDecimal m_sumabaseimponible = Env.ZERO;
 	private BigDecimal m_sumavalorimpuesto = Env.ZERO;
-	private String m_trxAutorizacionName = null;
 
 	// 04/07/2016 MHG Offline Schema added
 	private boolean isOfflineSchema = false;
 
 	public LEC_FE_MNotaCredito(Properties ctx, int C_Invoice_ID, String trxName) {
 		super(ctx, C_Invoice_ID, trxName);
-		// 04/07/2016 MHG Offline Schema added
 		isOfflineSchema=MSysConfig.getBooleanValue("QSSLEC_FE_OfflineSchema", false, Env.getAD_Client_ID(Env.getCtx()));
 	}
 
 	public String lecfeinvnc_SriExportNotaCreditoXML100 ()
 	{
 		String msgStatus = "";
-		Trx autorizacionTrx = null;
-		m_trxAutorizacionName=null;
 		int autorizationID = 0;	
 		String msg = null;
 		String ErrorDocumentno = "Error en Nota de Crédito No "+getDocumentNo()+" ";  
@@ -88,7 +83,9 @@ public class LEC_FE_MNotaCredito extends MInvoice
 
 		try
 		{
-			//log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
+			LEC_FE_MNotaCredito credit = new LEC_FE_MNotaCredito(getCtx(), getC_Invoice_ID(), get_TrxName());			
+			X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), credit.get_ValueAsInt("SRI_Authorization_ID"), get_TrxName());
+			
 			signature.setAD_Org_ID(getAD_Org_ID());
 
 			m_identificacionconsumidor=MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null, getAD_Client_ID());
@@ -174,79 +171,11 @@ public class LEC_FE_MNotaCredito extends MInvoice
 				DocRefDate = (java.sql.Timestamp) get_Value("InvoiceDocumentReferenceDate");
 			}
 
-			m_totaldescuento = Env.ZERO; // DB.getSQLValueBD(get_TrxName(), "SELECT COALESCE(SUM(ilt.discount), 0) FROM c_invoice_linetax_vt ilt WHERE ilt.C_Invoice_ID = ? ", getC_Invoice_ID());
-
-			// IsUseContingency
+			m_totaldescuento = Env.ZERO; 
 			msgStatus = "AccessCode";
-			int sri_accesscode_id = 0;
-			if (signature.IsUseContingency) {
-				sri_accesscode_id = LEC_FE_Utils.getNextAccessCode(getAD_Client_ID(), signature.getEnvType(), oi.getTaxID(), get_TrxName());
-				if ( sri_accesscode_id < 1)
-					return ErrorDocumentno+"No hay clave de contingencia para el comprobante";
-			}
-
-			// New/Upd Access Code
-			//Se crea una transaccion nueva para la autorizacion y clave de acceso, para realizar un commit, en el
-			//caso de que se envie el comprobante y no se obtenga respuesta del SRI
-			if (m_trxAutorizacionName == null)
-			{
-				StringBuilder l_trxname = new StringBuilder("SRI_")
-						.append(get_TableName()).append(get_ID());
-				m_trxAutorizacionName = Trx.createTrxName(l_trxname.toString());
-				autorizacionTrx = Trx.get(m_trxAutorizacionName, true);
-			}
-			X_SRI_AccessCode ac = null;
-			if (autorizacionTrx!=null)
-				ac = new X_SRI_AccessCode (getCtx(), sri_accesscode_id,autorizacionTrx.getTrxName());
-			else
-				ac = new X_SRI_AccessCode (getCtx(), sri_accesscode_id, get_TrxName());
-
-			ac.setAD_Org_ID(getAD_Org_ID());
-			ac.setOldValue(null);	// Deprecated
-			ac.setEnvType(signature.getEnvType());
-			ac.setCodeAccessType(signature.getCodeAccessType());
-			ac.setSRI_ShortDocType(m_coddoc);
-			ac.setIsUsed(true);
-
-			 // Access Code
-            m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-                    //oi.get_ValueAsString("SRI_OrgCode"), 
-                    LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-                    LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-                    getDocumentNo(),
-                    oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
 			
-			
-			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
-				ac.setValue(m_accesscode);
-
-			if (!ac.save()) {
-				msg = "@SaveError@ No se pudo grabar SRI Access Code";
-				return ErrorDocumentno+msg;
-			}
-
-			// New Authorization
-			X_SRI_Authorization a = null;
-			if (autorizacionTrx!=null)
-				a = new X_SRI_Authorization (getCtx(), 0, autorizacionTrx.getTrxName());
-			else
-				a = new X_SRI_Authorization (getCtx(), 0,get_TrxName());
-			a.setAD_Org_ID(getAD_Org_ID());
-			a.setSRI_ShortDocType(m_coddoc);
-			a.setValue(m_accesscode);
-			a.setSRI_AuthorizationCode(null);
-			a.setSRI_AccessCode_ID(ac.get_ID());
-			a.setSRI_ErrorCode_ID(0);
-			a.setAD_UserMail_ID(getAD_User_ID());
-			a.set_ValueOfColumn("isSRIOfflineSchema", isOfflineSchema);
-
-			if (!a.save()) {
-				msg = "@SaveError@ No se pudo grabar SRI Autorizacion";
-				return ErrorDocumentno+msg;
-			}
-			autorizationID = a.get_ID();
-
-
+			X_SRI_AccessCode ac = new X_SRI_AccessCode (getCtx(), a.getSRI_AccessCode_ID(), get_TrxName());		
+		
 			OutputStream  mmDocStream = null;
 
 			String xmlFileName = "SRI_" + m_coddoc + "-" + LEC_FE_Utils.getDate(getDateInvoiced(),9) + "-" + m_accesscode + ".xml";
@@ -282,9 +211,6 @@ public class LEC_FE_MNotaCredito extends MInvoice
 			atts.clear();
 			atts.addAttribute("", "", "id", "CDATA", "comprobante");
 			atts.addAttribute("", "", "version", "CDATA", f.get_ValueAsString("VersionNo"));
-			// atts.addAttribute("", "", "xmlns:ds", "CDATA", "http://www.w3.org/2000/09/xmldsig#");
-			// atts.addAttribute("", "", "xmlns:xsi", "CDATA", "http://www.w3.org/2001/XMLSchema-instance");
-			// atts.addAttribute("", "", "xsi:noNamespaceSchemaLocation", "CDATA", f.get_ValueAsString("Url_Xsd"));
 			mmDoc.startElement("", "", f.get_ValueAsString("XmlPrintLabel"), atts);
 
 			atts.clear();
@@ -498,19 +424,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 					addHeaderElement(mmDoc, "descuento", rs.getBigDecimal(7).toString(), atts);
 					// Numerico Max 14
 					addHeaderElement(mmDoc, "precioTotalSinImpuesto", rs.getBigDecimal(8).toString(), atts);
-					/*
-				if (rs.getString(14) != null)  {
-					mmDoc.startElement("","","detallesAdicionales",atts);
-
-					atts.clear();
-					atts.addAttribute("", "", "nombre", "CDATA", "descripcion1");
-					atts.addAttribute("", "", "valor", "CDATA", LEC_FE_Utils.cutString(rs.getString(14),300));
-					mmDoc.startElement("", "", "detAdicional", atts);
-					mmDoc.endElement("","","detAdicional");
-
-					mmDoc.endElement("","","detallesAdicionales");
-				}
-					 */
+				
 					atts.clear();
 					//
 					mmDoc.startElement("","","impuestos",atts);
@@ -576,22 +490,8 @@ public class LEC_FE_MNotaCredito extends MInvoice
 				mmDoc.endElement("", "", "campoAdicional");
 				mmDoc.endElement("", "", "infoAdicional");
 				
-			}
-			
-			/*
-		if (getDescription() != null)  {
-			mmDoc.startElement("","","infoAdicional",atts);
+			}			
 
-				atts.clear();
-				atts.addAttribute("", "", "nombre", "CDATA", "descripcion2");
-				mmDoc.startElement("", "", "campoAdicional", atts);
-				String valor = LEC_FE_Utils.cutString(getDescription(),300);
-				mmDoc.characters(valor.toCharArray(), 0, valor.length());
-				mmDoc.endElement("","","campoAdicional");
-
-			mmDoc.endElement("","","infoAdicional");
-		}
-			 */
 			mmDoc.endElement("","",f.get_ValueAsString("XmlPrintLabel"));
 
 			mmDoc.endDocument();
@@ -618,8 +518,6 @@ public class LEC_FE_MNotaCredito extends MInvoice
 				return ErrorDocumentno+msg;
 			}
 
-			//		if (LEC_FE_Utils.breakDialog("Firmando Xml")) return "Cancelado...";	// TODO Temp
-
 			log.warning("@Signing Xml@ -> " + file_name);
 			signature.setResource_To_Sign(file_name);
 			signature.setOutput_Directory(signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesFirmados);
@@ -637,11 +535,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 
 				if (msg != null)
 					if (!msg.equals("RECIBIDA")){
-						if (autorizacionTrx!=null){
-							autorizacionTrx.rollback();
-							autorizacionTrx.close();
-							autorizacionTrx = null;
-						}
+						
 						return ErrorDocumentno+msg;
 					}
 				String invoiceNo = getDocumentNo();		
@@ -649,9 +543,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 				a.setDescription(invoiceNo);
 				a.set_ValueOfColumn("DocumentID", invoiceID);
 				a.saveEx();
-				if (autorizacionTrx!=null){
-					autorizacionTrx.commit(true);
-				}
+				
 
 				// Procesar Autorizacion SRI
 				// 04/07/2016 MHG Offline Schema added
@@ -661,11 +553,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 						msg = signature.respuestaAutorizacionComprobante(ac, a, m_accesscode);
 
 						if (msg != null){
-							if (autorizacionTrx!=null){
-								autorizacionTrx.commit();
-								autorizacionTrx.close();
-								autorizacionTrx = null;
-							}
+							
 							return ErrorDocumentno+msg;
 						}
 					} catch (Exception ex) {
@@ -691,9 +579,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 
 				if (signature.isAttachXml())
 					LEC_FE_Utils.attachXmlFile(a.getCtx(), a.get_TrxName(), a.getSRI_Authorization_ID(), file_name);
-				if (autorizacionTrx!=null){
-					autorizacionTrx.commit(true);
-				}
+				
 			}
 
 			//		if (LEC_FE_Utils.breakDialog("Completando Nota Credito")) return "Cancelado...";	// TODO Temp
@@ -703,11 +589,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 		catch (Exception e)
 		{
 			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();
-			if (autorizacionTrx!=null){
-				autorizacionTrx.rollback();			
-				autorizacionTrx.close();
-				autorizacionTrx = null;
-			}
+			
 			return ErrorDocumentno+msg;
 		}catch (Error e) {
 			msg = "No se pudo crear XML - Error en Conexion con el SRI";
@@ -715,12 +597,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 		}
 
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
-		if (autorizacionTrx!=null){
-			autorizacionTrx.commit();
-
-			autorizacionTrx.close();
-			autorizacionTrx = null;			
-		}
+		
 
 		set_Value("SRI_Authorization_ID", autorizationID);
 		this.saveEx();

@@ -32,6 +32,7 @@ import org.globalqss.model.X_SRI_Authorization;
  *
  * @author Jesus Garcia - globalqss - Quality Systems & Solutions -
  *         http://globalqss.com
+ * @author Orlando Curieles - INGEINT SA
  * @version $Id: LCO_Utils.java,v 1.0 2008/05/26 23:01:26 cruiz Exp $
  */
 
@@ -171,26 +172,26 @@ public class LEC_FE_Utils {
 	 * @return string
 	 */
 	public static String getSecuencial(String docno, String shortdoctype) {
-		 if (shortdoctype.equals("01")) {
-	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
-	        }
-	        if (shortdoctype.equals("04")) {
-	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
-	        }
-	        if (shortdoctype.equals("05")) {
-	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
-	        }
-	        if (shortdoctype.equals("06")) {
-	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
-	        }
-	        if (shortdoctype.equals("07")) {
-	            return new String(docno.substring(docno.lastIndexOf(45) + 1));
-	        }
-	        if (shortdoctype.equals("03")) {
-	        	return new String(docno.substring(docno.lastIndexOf(45) + 1));
-	        }
-	        return new String(docno.trim());
-	    }
+		if (shortdoctype.equals("01")) {
+			return new String(docno.substring(docno.lastIndexOf(45) + 1));
+		}
+		if (shortdoctype.equals("04")) {
+			return new String(docno.substring(docno.lastIndexOf(45) + 1));
+		}
+		if (shortdoctype.equals("05")) {
+			return new String(docno.substring(docno.lastIndexOf(45) + 1));
+		}
+		if (shortdoctype.equals("06")) {
+			return new String(docno.substring(docno.lastIndexOf(45) + 1));
+		}
+		if (shortdoctype.equals("07")) {
+			return new String(docno.substring(docno.lastIndexOf(45) + 1));
+		}
+		if (shortdoctype.equals("03")) {
+			return new String(docno.substring(docno.lastIndexOf(45) + 1));
+		}
+		return new String(docno.trim());
+	}
 
 	/**
 	 * String getSecuencial from DocumentNo
@@ -198,40 +199,36 @@ public class LEC_FE_Utils {
 	 * @return string
 	 */
 	public static String formatDocNo(final String docno, final String shortdoctype) {
-        String doc17Sri = "";
-        try {
-            if (docno.trim().length() < 17) {
-                doc17Sri = docno.substring(0, 3);
-                if (docno.lastIndexOf(45) == -1) {
-                    doc17Sri = String.valueOf(doc17Sri) + docno.substring(0, 6) + "-";
-                }
-                else if (docno.lastIndexOf(45) == 3) {
-                    doc17Sri = String.valueOf(doc17Sri) + docno.substring(3, 7) + "-";
-                }
-                else if (docno.lastIndexOf(45) == 6) {
-                    doc17Sri = String.valueOf(doc17Sri) + "-" + docno.substring(3, 5);
-                }
-                else if (docno.lastIndexOf(45) == 7) {
-                    doc17Sri = String.valueOf(doc17Sri) + docno.substring(3, 8);
-                }
-                else {
-                    doc17Sri = docno.substring(0, 6);
-                }
-                doc17Sri = String.valueOf(doc17Sri) + fillString(9 - cutString(getSecuencial(docno, shortdoctype), 9).length(), '0') + cutString(getSecuencial(docno, shortdoctype), 9);
-            }
-            else {
-                doc17Sri = docno;
-            }
-        }
-        catch (Exception ex) {
-            throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_NotANumber"));
-        }
-        doc17Sri = cutString(doc17Sri.trim(), 17);
-        if (doc17Sri.length() != 17) {
-            throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_WrongLength"));
-        }
-        return doc17Sri;
-    }
+		String doc17Sri = "";
+		try {
+			if (docno.trim().length() < 17) {
+				doc17Sri = docno.substring(0, 3);
+				if (docno.lastIndexOf(45) == -1) {
+					doc17Sri = String.valueOf(doc17Sri) + docno.substring(0, 6) + "-";
+				} else if (docno.lastIndexOf(45) == 3) {
+					doc17Sri = String.valueOf(doc17Sri) + docno.substring(3, 7) + "-";
+				} else if (docno.lastIndexOf(45) == 6) {
+					doc17Sri = String.valueOf(doc17Sri) + "-" + docno.substring(3, 5);
+				} else if (docno.lastIndexOf(45) == 7) {
+					doc17Sri = String.valueOf(doc17Sri) + docno.substring(3, 8);
+				} else {
+					doc17Sri = docno.substring(0, 6);
+				}
+				doc17Sri = String.valueOf(doc17Sri)
+						+ fillString(9 - cutString(getSecuencial(docno, shortdoctype), 9).length(), '0')
+						+ cutString(getSecuencial(docno, shortdoctype), 9);
+			} else {
+				doc17Sri = docno;
+			}
+		} catch (Exception ex) {
+			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_NotANumber"));
+		}
+		doc17Sri = cutString(doc17Sri.trim(), 17);
+		if (doc17Sri.length() != 17) {
+			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_WrongLength"));
+		}
+		return doc17Sri;
+	}
 
 	/**
 	 * String replaceGuion from DocumentNo
@@ -274,7 +271,8 @@ public class LEC_FE_Utils {
 			Date enddate) {
 
 		int lec_sri_format_id = DB.getSQLValue(null,
-				"SELECT MAX(LEC_SRI_Format_ID) FROM LEC_SRI_Format WHERE AD_Client_ID = ? AND IsActive = 'Y' AND SRI_DeliveredType = ? AND SRI_ShortDocType = ? AND ? >= ValidFrom AND ( ? <= ValidTo OR ValidTo IS NULL)",
+				"SELECT MAX(LEC_SRI_Format_ID) FROM LEC_SRI_Format WHERE AD_Client_ID = ? AND IsActive = 'Y' AND SRI_DeliveredType = ? "
+						+ "AND SRI_ShortDocType = ? AND ? >= ValidFrom AND ( ? <= ValidTo OR ValidTo IS NULL)",
 				ad_client_id, tipoemision, coddoc, startdate, enddate);
 
 		return lec_sri_format_id;
@@ -322,7 +320,11 @@ public class LEC_FE_Utils {
 	public static int getInOutDocSustento(int m_inout_id) {
 
 		int c_invoice_sus_id = DB.getSQLValue(null,
-				"SELECT COALESCE(MAX(i.C_Invoice_ID), -1) FROM M_InOut io JOIN M_InOutLine iol ON iol.M_InOut_ID = io.M_InOut_ID JOIN C_InvoiceLine il ON il.M_InOutLine_ID = iol.M_InOutLine_ID JOIN C_Invoice i ON i.C_Invoice_ID = il.C_Invoice_ID WHERE i.DocStatus IN ('CO','CL') AND io.M_InOut_ID = ? ",
+				"SELECT COALESCE(MAX(i.C_Invoice_ID), -1) "
+						+ "FROM M_InOut io JOIN M_InOutLine iol ON iol.M_InOut_ID = io.M_InOut_ID "
+						+ "JOIN C_InvoiceLine il ON il.M_InOutLine_ID = iol.M_InOutLine_ID "
+						+ "JOIN C_Invoice i ON i.C_Invoice_ID = il.C_Invoice_ID "
+						+ "WHERE i.DocStatus IN ('CO','CL') AND io.M_InOut_ID = ? ",
 				m_inout_id);
 
 		return c_invoice_sus_id;
@@ -336,9 +338,11 @@ public class LEC_FE_Utils {
 	 */
 	public static int getAuthorisedInvoice(int sri_authosisation_id) {
 
-		int c_invoice_authorised_id = DB.getSQLValue(null,
-				"SELECT COALESCE(MAX(i.C_Invoice_ID), -1) FROM C_Invoice i WHERE i.SRI_Authorization_ID = ?  AND DocStatus in ('CO', 'CL') ",
-				sri_authosisation_id);
+		int c_invoice_authorised_id = DB
+				.getSQLValue(null,
+						"SELECT COALESCE(MAX(i.C_Invoice_ID), -1) " + "FROM C_Invoice i "
+								+ "WHERE i.SRI_Authorization_ID = ?  AND DocStatus in ('CO', 'CL') ",
+						sri_authosisation_id);
 
 		return c_invoice_authorised_id;
 
@@ -397,7 +401,10 @@ public class LEC_FE_Utils {
 	public static int getMovLocator(int m_movement_id) {
 
 		int c_location_id = DB.getSQLValue(null,
-				"SELECT MIN(C_Location_ID) FROM M_MovementLine ml JOIN M_Locator l ON l.M_Locator_ID = ml.M_Locator_ID JOIN M_Warehouse w ON w.M_Warehouse_ID = l.M_Warehouse_ID WHERE M_Movement_ID = ? GROUP BY M_Movement_ID ",
+				"SELECT MIN(C_Location_ID) " + "FROM M_MovementLine ml "
+						+ "JOIN M_Locator l ON l.M_Locator_ID = ml.M_Locator_ID "
+						+ "JOIN M_Warehouse w ON w.M_Warehouse_ID = l.M_Warehouse_ID "
+						+ "WHERE M_Movement_ID = ? GROUP BY M_Movement_ID ",
 				m_movement_id);
 
 		return c_location_id;
@@ -412,7 +419,11 @@ public class LEC_FE_Utils {
 	public static int getInvAllDocSustento(int c_invoice_id) { // Deprecated
 
 		int c_invoice_sus_id = DB.getSQLValue(null,
-				"SELECT al.C_Invoice_ID FROM C_AllocationHdr ah JOIN C_AllocationLine al ON al.C_AllocationHdr_ID = ah.C_AllocationHdr_ID WHERE ah.C_AllocationHdr_ID IN (SELECT al.C_AllocationHdr_ID FROM C_AllocationLine al WHERE al.C_Invoice_ID = ?) AND ah.DocStatus IN ('CO','CL') AND al.C_Invoice_ID != ? ",
+				"SELECT al.C_Invoice_ID " + "FROM C_AllocationHdr ah "
+						+ "JOIN C_AllocationLine al ON al.C_AllocationHdr_ID = ah.C_AllocationHdr_ID "
+						+ "WHERE ah.C_AllocationHdr_ID IN (SELECT al.C_AllocationHdr_ID "
+						+ "FROM C_AllocationLine al WHERE al.C_Invoice_ID = ?) "
+						+ "AND ah.DocStatus IN ('CO','CL') AND al.C_Invoice_ID != ? ",
 				c_invoice_id, c_invoice_id);
 
 		return c_invoice_sus_id;
@@ -682,7 +693,7 @@ public class LEC_FE_Utils {
 		int count = 0;
 		StringBuffer sql = new StringBuffer("SELECT distinct mi.documentno, mi.dateAcct " + "FROM m_inout mi  "
 				+ "	join m_inoutline mil on mil.m_inout_id = mi.m_inout_id "
-				+ "	join c_invoiceline il on mil.m_inoutline_id = il.m_inoutline_id " + "WHERE il.c_invoice_id = ? "
+				+ "	join c_invoiceline il on mil.m_inoutline_id = il.m_inoutline_id " + " WHERE il.c_invoice_id = ? "
 				+ "    and mi.docstatus in ('CO','CL') " + "    and il.m_inoutline_id is not null "
 				+ "    and length(mi.documentno) = 17 " + "order by mi.dateAcct, mi.documentno ");
 
@@ -714,10 +725,25 @@ public class LEC_FE_Utils {
 		else
 			return allguides.toString();
 	}
-	
-    public static String getOrgCode(final String docno) {
-        return new String(docno.substring(0, 3));
-    }
 
+	public static String getOrgCode(final String docno) {
+		return new String(docno.substring(0, 3));
+	}
+
+	public static String ReplaceSpecialChar(String word) {
+		String[] badChars = { "ñ", "|", "à", "á", "À", "Á", "è", "é", "È", "É", "ì", "í", "Ì", "Í", "ò", "ó", "Ò", "Ó",
+				"ù", "ú", "Ù", "Ú", "\b", "/", ":", "<", "*", "?", ">" };
+		String[] goodChars = { "n", "_", "a", "a", "A", "A", "e", "e", "E", "E", "i", "i", "I", "I", "o", "o", "O", "O",
+				"u", "u", "U", "U", "_", "", "", "", "", "", "" };
+
+		for (String bwords : badChars) {
+			if (word.contains(bwords)) {
+				word = word.replace(bwords, goodChars[Arrays.asList(badChars).indexOf(bwords)]);
+			}
+		}
+
+		return word;
+
+	}
 
 } // LEC_FE_Utils

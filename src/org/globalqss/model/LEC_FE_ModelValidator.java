@@ -130,12 +130,16 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
 
-			if (dt.get_ValueAsString("SRI_ShortDocType").equals("01")) {
+			if (dt.get_ValueAsString("SRI_ShortDocType") != null
+					|| !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
 
-				String AccessCode = LEC_FE_CreateAccessCode.CreateAccessCode(invoice);
+				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(),
+						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
+						invoice.getC_Invoice_ID(), invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(),
+						invoice.getDocumentNo(), invoice.get_TrxName());
 
-				if (!AccessCode.equals("Created"))
-					throw new AdempiereException("@NotCreated@");
+				invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+				invoice.saveEx();
 			}
 
 			if (MDocType.DOCSUBTYPESO_OnCreditOrder.equals(invoice.getC_Order().getC_DocType().getDocSubTypeSO())) { // (W)illCall(I)nvoice
@@ -524,7 +528,16 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 						throw new AdempiereException(Msg.translate(Env.getCtx(), "FillMandatory") + " "
 								+ Msg.getElement(Env.getCtx(), MMovement.COLUMNNAME_C_BPartner_Location_ID));
 				}
+
+				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(movement.getCtx(),
+						MMovement.COLUMNNAME_M_Movement_ID, movement.getAD_Org_ID(), movement.getAD_User_ID(),
+						movement.getM_Movement_ID(), movement.getC_DocType_ID(), movement.getMovementDate(),
+						movement.getDocumentNo(), movement.get_TrxName());
+
+				movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+				movement.saveEx();
 			}
+
 		}
 		return msg;
 	}// Validate Movement - before complete
@@ -942,7 +955,8 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 			MDocType doctype = new MDocType(inout.getCtx(), inout.getC_DocType_ID(), inout.get_TrxName());
 
-			if (!(doctype.get_Value("SRI_ShortDocType") == null)) {
+			if (doctype.get_ValueAsString("SRI_ShortDocType") != null
+					|| !doctype.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
 
 				if (inout.getAD_User_ID() <= 0)
 					msg = Msg.translate(Env.getCtx(), "FillMandatory") + " "
@@ -974,6 +988,14 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 								+ Msg.getElement(Env.getCtx(), MInOut.COLUMNNAME_C_BPartner_Location_ID);
 				} // End validations
 			}
+
+			X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(inout.getCtx(),
+					MInOut.COLUMNNAME_M_InOut_ID, inout.getAD_Org_ID(), inout.getAD_User_ID(), inout.getM_InOut_ID(),
+					inout.getC_DocType_ID(), inout.getMovementDate(), inout.getDocumentNo(), inout.get_TrxName());
+
+			inout.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+			inout.saveEx();
+
 		}
 		return msg;
 	}

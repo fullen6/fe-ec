@@ -99,6 +99,14 @@ public class LEC_FE_MInvoice extends MInvoice {
 					getAD_Client_ID());
 			m_razonsocial = MSysConfig.getValue("QSSLEC_FE_RazonSocialPruebas", null, getAD_Client_ID());
 
+			signature.setPKCS12_Resource(
+					MSysConfig.getValue("QSSLEC_FE_RutaCertificadoDigital", null, getAD_Client_ID(), getAD_Org_ID()));
+			signature.setPKCS12_Password(
+					MSysConfig.getValue("QSSLEC_FE_ClaveCertificadoDigital", null, getAD_Client_ID(), getAD_Org_ID()));
+
+			if (signature.getFolderRaiz() == null)
+				return ErrorDocumentno + "No existe parametro para Ruta Generacion Xml";
+
 			MDocType dt = new MDocType(getCtx(), getC_DocTypeTarget_ID(), get_TrxName());
 			if (dt.get_Value("IsInternal") != null)
 				isInternal = dt.get_ValueAsBoolean("IsInternal");
@@ -245,9 +253,9 @@ public class LEC_FE_MInvoice extends MInvoice {
 			// Numerico1
 			addHeaderElement(mmDoc, "tipoEmision", signature.getDeliveredType(), atts);
 			// Alfanumerico Max 300
-			addHeaderElement(mmDoc, "razonSocial", bpe.getName(), atts);
+			addHeaderElement(mmDoc, "razonSocial", LEC_FE_Utils.ReplaceSpecialChar(bpe.getName()), atts);
 			// Alfanumerico Max 300
-			addHeaderElement(mmDoc, "nombreComercial", bpe.getName2() == null ? bpe.getName() : bpe.getName2(), atts);
+			addHeaderElement(mmDoc, "nombreComercial", bpe.getName2() == null ? LEC_FE_Utils.ReplaceSpecialChar(bpe.getName()) : LEC_FE_Utils.ReplaceSpecialChar(bpe.getName2()), atts);
 			// Numerico13
 			addHeaderElement(mmDoc, "ruc",
 					(LEC_FE_Utils.fillString(13 - (LEC_FE_Utils.cutString(bpe.getTaxID(), 13)).length(), '0'))
@@ -275,7 +283,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 			// Fecha8 ddmmaaaa
 			addHeaderElement(mmDoc, "fechaEmision", LEC_FE_Utils.getDate(getDateInvoiced(), 10), atts);
 			// Alfanumerico Max 300
-			addHeaderElement(mmDoc, "dirEstablecimiento", lo.getAddress1(), atts);
+			addHeaderElement(mmDoc, "dirEstablecimiento", LEC_FE_Utils.ReplaceSpecialChar(lo.getAddress1()), atts);
 			// Numerico3-5
 			addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
 			// Texto2
@@ -361,7 +369,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				addHeaderElement(mmDoc, "guiaRemision", guias, atts);
 
 			// Alfanumerico Max 300
-			addHeaderElement(mmDoc, "razonSocialComprador", m_razonsocial, atts);
+			addHeaderElement(mmDoc, "razonSocialComprador", LEC_FE_Utils.ReplaceSpecialChar(m_razonsocial), atts);
 			// Numerico Max 13
 			addHeaderElement(mmDoc, "identificacionComprador", m_identificacioncomprador, atts);
 			// Alfanumerico Max 300
@@ -369,18 +377,18 @@ public class LEC_FE_MInvoice extends MInvoice {
 			// DIRECCION COMPRADOR FCN
 
 			StringBuffer addr = new StringBuffer();
-			addr.append(getC_BPartner_Location().getC_Location().getAddress1() + " ");
+			addr.append(LEC_FE_Utils.ReplaceSpecialChar(getC_BPartner_Location().getC_Location().getAddress1()) + " ");
 			addr.append(getC_BPartner_Location().getC_Location().getAddress2() == null ? ""
-					: getC_BPartner_Location().getC_Location().getAddress2() + " ");
+					: LEC_FE_Utils.ReplaceSpecialChar(getC_BPartner_Location().getC_Location().getAddress2()) + " ");
 			addr.append(getC_BPartner_Location().getC_Location().getCity() == null ? ""
-					: getC_BPartner_Location().getC_Location().getCity() + "-");
+					: LEC_FE_Utils.ReplaceSpecialChar(getC_BPartner_Location().getC_Location().getCity()) + "-");
 			addr.append(getC_BPartner_Location().getC_Location().getRegionName() == null ? ""
 					: getC_BPartner_Location().getC_Location().getRegionName());
 			addr.append(getC_BPartner_Location().getC_Location().getC_Country().getName() == null ? ""
 					: "," + getC_BPartner_Location().getC_Location().getC_Country().getName());
 			String valaddr = addr.toString();
 
-			addHeaderElement(mmDoc, "direccionComprador", LEC_FE_Utils.cutString(valaddr.toString(), 300), atts);
+			addHeaderElement(mmDoc, "direccionComprador", LEC_FE_Utils.cutString(LEC_FE_Utils.ReplaceSpecialChar(valaddr.toString()), 300), atts);
 
 			// Numerico Max 14
 			addHeaderElement(mmDoc, "totalSinImpuestos", getTotalLines().toString(), atts);
@@ -608,11 +616,11 @@ public class LEC_FE_MInvoice extends MInvoice {
 					mmDoc.startElement("", "", "detalle", atts);
 
 					// Alfanumerico MAx 25
-					addHeaderElement(mmDoc, "codigoPrincipal", LEC_FE_Utils.cutString(rs.getString(2), 25), atts);
+					addHeaderElement(mmDoc, "codigoPrincipal", LEC_FE_Utils.cutString(LEC_FE_Utils.ReplaceSpecialChar(rs.getString(2)), 25), atts);
 					// Alfanumerico MAx 25
-					addHeaderElement(mmDoc, "codigoAuxiliar", LEC_FE_Utils.cutString(rs.getString(3), 25), atts);
+					addHeaderElement(mmDoc, "codigoAuxiliar", LEC_FE_Utils.cutString(LEC_FE_Utils.ReplaceSpecialChar(rs.getString(3)), 25), atts);
 					// Alfanumerico Max 300
-					addHeaderElement(mmDoc, "descripcion", LEC_FE_Utils.cutString(rs.getString(4), 300), atts);
+					addHeaderElement(mmDoc, "descripcion", LEC_FE_Utils.cutString(LEC_FE_Utils.ReplaceSpecialChar(rs.getString(4)), 300), atts);
 					// Alfanumerico Max 50
 
 					// Numerico Max 14
@@ -690,7 +698,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				atts.clear();
 				atts.addAttribute("", "", "nombre", "CDATA", "Descripcion");
 				mmDoc.startElement("", "", "campoAdicional", atts);
-				valor = LEC_FE_Utils.cutString(getDescription(), 300);
+				valor = LEC_FE_Utils.cutString(LEC_FE_Utils.ReplaceSpecialChar(getDescription()), 300);
 				mmDoc.characters(valor.toCharArray(), 0, valor.length());
 				mmDoc.endElement("", "", "campoAdicional");
 			}
@@ -973,7 +981,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 				// TODO Agregar al OffLine el error Maybe ADNote
 				return ErrorDocumentno + msg;
 			}
-			a.set_ValueOfColumn("IsToSend", true);
+			a.set_ValueOfColumn("IsToSend", false);
 			a.setSRI_AuthorizationCode(a.getValue());
 			a.saveEx();
 			msg = null;

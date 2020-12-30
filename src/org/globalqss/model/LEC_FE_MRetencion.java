@@ -56,7 +56,6 @@ public class LEC_FE_MRetencion extends MInvoice {
 	private String file_name = "";
 	private String m_obligadocontabilidad = "NO";
 	private String m_coddoc = "";
-	private String m_accesscode;
 	private String m_identificacionconsumidor = "";
 	private String m_tipoidentificacioncomprador = "";
 	private String m_identificacioncomprador = "";
@@ -80,7 +79,9 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 	public String lecfeinvret_SriExportRetencionXML100() {
 		String msgStatus = "";
-		X_SRI_Authorization a = null;
+		
+		LEC_FE_MRetencion wh = new LEC_FE_MRetencion(getCtx(), getC_Invoice_ID(), get_TrxName());		
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), wh.get_ValueAsInt("SRI_Authorization_ID"), get_TrxName()); 
 
 		String msg = null;
 		String ErrorDocumentno = "Error en Retención No " + getDocumentNo() + " ";
@@ -102,7 +103,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 					MSysConfig.getValue("QSSLEC_FE_ClaveCertificadoDigital", null, getAD_Client_ID(), getAD_Org_ID()));
 
 			if (signature.getFolderRaiz() == null)
-				return ErrorDocumentno + "No existe parametro para Ruta Generacion Xml";
+				return ErrorDocumentno + "No exisfte parametro para Ruta Generacion Xml";
 
 			MDocType dt = new MDocType(getCtx(), getC_DocTypeTarget_ID(), get_TrxName());
 
@@ -171,55 +172,11 @@ public class LEC_FE_MRetencion extends MInvoice {
 			
 			// IsUseContingency
 			int sri_accesscode_id = 0;
-			if (signature.IsUseContingency) {
-				sri_accesscode_id = LEC_FE_Utils.getNextAccessCode(getAD_Client_ID(), signature.getEnvType(),
-						oi.getTaxID(), get_TrxName());
-				if (sri_accesscode_id < 1)
-					return ErrorDocumentno + "No hay clave de contingencia para el comprobante";
-			}
-
-			// New/Upd Access Code
-
-			X_SRI_AccessCode ac = null;
-			ac = new X_SRI_AccessCode(getCtx(), sri_accesscode_id, get_TrxName());
-			ac.setAD_Org_ID(getAD_Org_ID());
-			ac.setOldValue(null); // Deprecated
-			ac.setEnvType(signature.getEnvType());
-			ac.setCodeAccessType(signature.getCodeAccessType());
-			ac.setSRI_ShortDocType(m_coddoc);
-			ac.setIsUsed(true);
-
-			// Access Code
-			msgStatus = "AccessCode";
-			m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-					oi.get_ValueAsString("SRI_OrgCode"),
-					LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(m_retencionno, m_coddoc)), m_retencionno,
-					oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
 			
-			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
-				ac.setValue(m_accesscode);
-
-			if (!ac.save()) {
-				msg = "@SaveError@ No se pudo grabar SRI Access Code";
-				return ErrorDocumentno + msg;
-			}
-
-			// New Authorization
-			a = new X_SRI_Authorization(getCtx(), 0, get_TrxName());
-			a.setAD_Org_ID(getAD_Org_ID());
-			a.setSRI_ShortDocType(m_coddoc);
-			a.setValue(m_accesscode);
-			a.setSRI_AuthorizationCode(null);
-			a.setSRI_AccessCode_ID(ac.get_ID());
-			a.setSRI_ErrorCode_ID(0);
-			a.setAD_UserMail_ID(getAD_User_ID());
-			a.set_ValueOfColumn("isSRIOfflineSchema", isOfflineSchema);
-			a.set_ValueOfColumn("C_Invoice_ID", getC_Invoice_ID());
-
 			OutputStream mmDocStream = null;
 
 			String xmlFileName = "SRI_" + m_coddoc + "-" + LEC_FE_Utils.getDate(getDateInvoiced(), 9) + "-"
-					+ m_accesscode + ".xml";
+					+ a.getValue() + ".xml";
 
 			// ruta completa del archivo xml
 			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesGenerados
@@ -254,12 +211,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 			atts.clear();
 			atts.addAttribute("", "", "id", "CDATA", "comprobante");
 			atts.addAttribute("", "", "version", "CDATA", f.get_ValueAsString("VersionNo"));
-			// atts.addAttribute("", "", "xmlns:ds", "CDATA",
-			// "http://www.w3.org/2000/09/xmldsig#");
-			// atts.addAttribute("", "", "xmlns:xsi", "CDATA",
-			// "http://www.w3.org/2001/XMLSchema-instance");
-			// atts.addAttribute("", "", "xsi:noNamespaceSchemaLocation", "CDATA",
-			// f.get_ValueAsString("Url_Xsd"));
+			
 			mmDoc.startElement("", "", f.get_ValueAsString("XmlPrintLabel"), atts);
 
 			atts.clear();
@@ -466,13 +418,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
 								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
 					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
-						String invoiceNo = getDocumentNo();
-						String invoiceID = String.valueOf(get_ID());
-						a.setDescription(invoiceNo);
-						a.set_ValueOfColumn("DocumentID", invoiceID);
-						a.set_ValueOfColumn("C_Invoice_ID", get_ID());
-						a.saveEx();
-						set_Value("SRI_Authorization_ID", a.get_ID());
+						
 						this.saveEx();
 						return ErrorDocumentno + msg;
 					}
@@ -497,18 +443,13 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 					return ErrorDocumentno + msg;
 				}
-				String invoiceNo = getDocumentNo();
-				String invoiceID = String.valueOf(get_ID());
-				a.setDescription(invoiceNo);
-				a.set_ValueOfColumn("DocumentID", invoiceID);
-				a.saveEx();
-
+				
 				// Procesar Autorizacion SRI
 				// 04/07/2016 MHG Offline Schema added
 				if (!isOfflineSchema) {
 					log.warning("@Authorizing Xml@ -> " + file_name);
 					try {
-						msg = signature.respuestaAutorizacionComprobante(ac, a, m_accesscode);
+						msg = signature.respuestaAutorizacionComprobante((X_SRI_AccessCode) a.getSRI_AccessCode(), a, a.getSRI_AccessCode().getValue());
 
 						if (msg != null) {
 							return ErrorDocumentno + msg;
