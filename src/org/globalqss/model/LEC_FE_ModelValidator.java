@@ -131,7 +131,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
 
 			if (dt.get_ValueAsString("SRI_ShortDocType") != null
-					|| !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
+					&& !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
 
 				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(),
 						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
@@ -156,7 +156,6 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		// after completing SO invoice process electronic invoice
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_COMPLETE)) {
 			MInvoice invoice = (MInvoice) po;
-			boolean IsGenerateInBatch = false;
 			MDocType dt = new MDocType(invoice.getCtx(), invoice.getC_DocTypeTarget_ID(), invoice.get_TrxName());
 			String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
@@ -164,27 +163,10 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 				MDocType dto = new MDocType(invoice.getCtx(), invoice.getC_Order().getC_DocType_ID(),
 						invoice.get_TrxName());
 
-				if (dto.get_ValueAsBoolean("IsGenerateInBatch"))
-					IsGenerateInBatch = true;
 			}
-
-			if (dt.get_ValueAsBoolean("IsGenerateInBatch"))
-				IsGenerateInBatch = true;
 
 			//
-			if (!shortdoctype.equals("") && !IsGenerateInBatch && !isOfflineSchema) {
 
-				msg = invoiceGenerateXml(invoice);
-
-				if (msg != null)
-					throw new RuntimeException(msg);
-
-				if (invoice.get_Value("SRI_Authorization_ID") != null) {
-					int authorization = Integer.valueOf(invoice.get_Value("SRI_Authorization_ID").toString());
-					if (!isOfflineSchema)
-						sendMail(authorization, null);
-				}
-			}
 		}
 
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_PREPARE)) {
@@ -306,10 +288,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 				msg = movementGenerateXml(movement);
 				if (msg != null)
 					throw new RuntimeException(msg);
-				/*
-				 * Trx sriTrx = null; sriTrx = Trx.get(movement.get_TrxName(), false); if
-				 * (sriTrx != null) { sriTrx.commit(); } movement.load(sriTrx.getTrxName());
-				 */
+				
 				if (movement.get_Value("SRI_Authorization_ID") != null) {
 					int authorization = Integer.valueOf(movement.get_Value("SRI_Authorization_ID").toString());
 					sendMail(authorization, null);
@@ -956,7 +935,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			MDocType doctype = new MDocType(inout.getCtx(), inout.getC_DocType_ID(), inout.get_TrxName());
 
 			if (doctype.get_ValueAsString("SRI_ShortDocType") != null
-					|| !doctype.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
+					&& !doctype.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
 
 				if (inout.getAD_User_ID() <= 0)
 					msg = Msg.translate(Env.getCtx(), "FillMandatory") + " "
@@ -987,14 +966,15 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 						msg = Msg.translate(Env.getCtx(), "FillMandatory") + " "
 								+ Msg.getElement(Env.getCtx(), MInOut.COLUMNNAME_C_BPartner_Location_ID);
 				} // End validations
+
+				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(inout.getCtx(),
+						MInOut.COLUMNNAME_M_InOut_ID, inout.getAD_Org_ID(), inout.getAD_User_ID(),
+						inout.getM_InOut_ID(), inout.getC_DocType_ID(), inout.getMovementDate(), inout.getDocumentNo(),
+						inout.get_TrxName());
+
+				inout.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+				inout.saveEx();
 			}
-
-			X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(inout.getCtx(),
-					MInOut.COLUMNNAME_M_InOut_ID, inout.getAD_Org_ID(), inout.getAD_User_ID(), inout.getM_InOut_ID(),
-					inout.getC_DocType_ID(), inout.getMovementDate(), inout.getDocumentNo(), inout.get_TrxName());
-
-			inout.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
-			inout.saveEx();
 
 		}
 		return msg;

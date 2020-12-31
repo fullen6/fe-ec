@@ -54,17 +54,16 @@ public class AutorizacionComprobantesOfflineService extends Service{
 
 	public AutorizacionComprobantesOfflineService(URL wsdlLocation, QName serviceName,
 			WebServiceFeature... features) {
-		super(wsdlLocation, serviceName, features);
+		super(wsdlLocation, serviceName);
 	}
 
 	public AutorizacionComprobantesOfflineService(URL wsdlLocation,
 			WebServiceFeature... features) {
-		super(wsdlLocation, AUTORIZACIONCOMPROBANTESSERVICE_QNAME, features);
+		super(wsdlLocation, AUTORIZACIONCOMPROBANTESSERVICE_QNAME);
 	}
 
 	public AutorizacionComprobantesOfflineService(WebServiceFeature... features) {
-		super(__getWsdlLocation(), AUTORIZACIONCOMPROBANTESSERVICE_QNAME,
-				features);
+		super(__getWsdlLocation(), AUTORIZACIONCOMPROBANTESSERVICE_QNAME);
 	}
 
 	@WebEndpoint(name = "AutorizacionComprobantesPort")

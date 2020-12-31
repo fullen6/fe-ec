@@ -34,6 +34,9 @@ public class LEC_FE_CreateAccessCode {
 		MOrgInfo oi = MOrgInfo.get(ctx, AD_Org_ID, trxName);
 		MDocType dt = MDocType.get(ctx, C_DocType);
 		String m_coddoc = dt.get_ValueAsString("SRI_ShortDocType");
+		
+		if (m_coddoc.isEmpty())
+			return null;
 
 		// 04/07/2016 MHG Offline Schema added
 		isOfflineSchema = MSysConfig.getBooleanValue("QSSLEC_FE_OfflineSchema", false,
@@ -46,9 +49,10 @@ public class LEC_FE_CreateAccessCode {
 
 		signature.setAD_Org_ID(AD_Org_ID);
 		signature.setPKCS12_Resource(
-				MSysConfig.getValue("QSSLEC_FE_RutaCertificadoDigital", null, oi.getAD_Client_ID(), AD_Org_ID));
+				MSysConfig.getValue("QSSLEC_FE_RutaCertificadoDigital", null, oi.getAD_Client_ID()));
 		signature.setPKCS12_Password(
-				MSysConfig.getValue("QSSLEC_FE_ClaveCertificadoDigital", null, oi.getAD_Client_ID(), AD_Org_ID));
+				MSysConfig.getValue(""
+						+ "", null, oi.getAD_Client_ID()));
 
 		if (signature.getFolderRaiz() == null)
 			throw new AdempiereException("No existe parametro para Ruta Generacion Xml");

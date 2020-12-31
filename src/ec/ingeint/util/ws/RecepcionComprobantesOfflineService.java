@@ -53,16 +53,16 @@ public class RecepcionComprobantesOfflineService extends Service{
 
 	public RecepcionComprobantesOfflineService(URL wsdlLocation, QName serviceName,
 			WebServiceFeature... features) {
-		super(wsdlLocation, serviceName, features);
+		super(wsdlLocation, serviceName);
 	}
 
 	public RecepcionComprobantesOfflineService(URL wsdlLocation,
 			WebServiceFeature... features) {
-		super(wsdlLocation, RECEPCIONCOMPROBANTESSERVICE_QNAME, features);
+		super(wsdlLocation, RECEPCIONCOMPROBANTESSERVICE_QNAME);
 	}
 
 	public RecepcionComprobantesOfflineService(WebServiceFeature... features) {
-		super(__getWsdlLocation(), RECEPCIONCOMPROBANTESSERVICE_QNAME, features);
+		super(__getWsdlLocation(), RECEPCIONCOMPROBANTESSERVICE_QNAME);
 	}
 
 	@WebEndpoint(name = "RecepcionComprobantesOfflinePort")
