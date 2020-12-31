@@ -164,16 +164,12 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 						invoice.get_TrxName());
 
 			}
-
-			//
-
 		}
 
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_PREPARE)) {
 
 			log.severe("-----------------DOC_AFTER_PREPARE");
 			MInvoice invoice = (MInvoice) po;
-			boolean IsGenerateInBatch = false;
 			MDocType dt = new MDocType(invoice.getCtx(), invoice.getC_DocTypeTarget_ID(), invoice.get_TrxName());
 			String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
@@ -181,12 +177,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 				MDocType dto = new MDocType(invoice.getCtx(), invoice.getC_Order().getC_DocType_ID(),
 						invoice.get_TrxName());
 
-				if (dto.get_ValueAsBoolean("IsGenerateInBatch"))
-					IsGenerateInBatch = true;
 			}
-
-			if (dt.get_ValueAsBoolean("IsGenerateInBatch"))
-				IsGenerateInBatch = true;
 
 			if (isOfflineSchema && shortdoctype != "")
 				invoice.set_ValueOfColumn("isSRIOfflineSchema", "Y");
@@ -196,7 +187,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			invoice.saveEx();
 
 			//
-			if (!shortdoctype.equals("") && !IsGenerateInBatch && isOfflineSchema) {
+			if (!shortdoctype.equals("") && isOfflineSchema) {
 
 				if (invoice.get_Value("SRI_Authorization_ID") == null) {
 
@@ -208,22 +199,11 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		if (po.get_TableName().equals(MInOut.Table_Name) && type.equals(IEventTopics.DOC_AFTER_COMPLETE)) {
 
 			MInOut inout = (MInOut) po;
-			boolean IsGenerateInBatch = false;
 			MDocType dt = new MDocType(inout.getCtx(), inout.getC_DocType_ID(), inout.get_TrxName());
 			String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
-			if (inout.getC_Order_ID() > 0) {
-				MDocType dto = new MDocType(inout.getCtx(), inout.getC_Order().getC_DocType_ID(), inout.get_TrxName());
-
-				if (dto.get_ValueAsBoolean("IsGenerateInBatch"))
-					IsGenerateInBatch = true;
-			}
-
-			if (dt.get_ValueAsBoolean("IsGenerateInBatch"))
-				IsGenerateInBatch = true;
-
 			//
-			if (!shortdoctype.equals("") && !IsGenerateInBatch && !isOfflineSchema) {
+			if (!shortdoctype.equals("") && !isOfflineSchema) {
 
 				msg = inoutGenerateXml(inout);
 
@@ -245,20 +225,9 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			if (isOfflineSchema) {
 
 				MInOut inout = (MInOut) po;
-				boolean IsGenerateInBatch = false;
 				MDocType dt = new MDocType(inout.getCtx(), inout.getC_DocType_ID(), inout.get_TrxName());
 				String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
-				if (inout.getC_Order_ID() > 0) {
-					MDocType dto = new MDocType(inout.getCtx(), inout.getC_Order().getC_DocType_ID(),
-							inout.get_TrxName());
-
-					if (dto.get_ValueAsBoolean("IsGenerateInBatch"))
-						IsGenerateInBatch = true;
-				}
-
-				if (dt.get_ValueAsBoolean("IsGenerateInBatch"))
-					IsGenerateInBatch = true;
 				if (isOfflineSchema && shortdoctype != "")
 					inout.set_ValueOfColumn("isSRIOfflineSchema", "Y");
 				else
@@ -267,7 +236,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 				inout.saveEx();
 
 				//
-				if (!shortdoctype.equals("") && !IsGenerateInBatch && isOfflineSchema) {
+				if (!shortdoctype.equals("") && isOfflineSchema) {
 
 					if (inout.get_Value("SRI_Authorization_ID") != null) {
 						int authorization = Integer.valueOf(inout.get_Value("SRI_Authorization_ID").toString());
@@ -288,7 +257,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 				msg = movementGenerateXml(movement);
 				if (msg != null)
 					throw new RuntimeException(msg);
-				
+
 				if (movement.get_Value("SRI_Authorization_ID") != null) {
 					int authorization = Integer.valueOf(movement.get_Value("SRI_Authorization_ID").toString());
 					sendMail(authorization, null);
@@ -298,7 +267,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 		if (po.get_TableName().equals(MMovement.Table_Name) && type.equals(IEventTopics.DOC_AFTER_PREPARE)) {
 
-			log.warning("-----------------DOC_AFTER_PREPARE");
+			log.info("-----------------DOC_AFTER_PREPARE");
 
 			MMovement movement = (MMovement) po;
 
@@ -313,15 +282,8 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			movement.saveEx();
 
 			//
-			if (!shortdoctype.equals("") && !dt.get_ValueAsBoolean("IsGenerateInBatch") && isOfflineSchema) {
-				//
-				// msg = movementGenerateXml(movement);
-				// if (msg != null)
-				// throw new RuntimeException(msg);
-				/*
-				 * Trx sriTrx = null; sriTrx = Trx.get(movement.get_TrxName(), false); if
-				 * (sriTrx != null) { sriTrx.commit(); } movement.load(sriTrx.getTrxName());
-				 */
+			if (!shortdoctype.equals("") && isOfflineSchema) {
+
 				if (movement.get_Value("SRI_Authorization_ID") != null) {
 					int authorization = Integer.valueOf(movement.get_Value("SRI_Authorization_ID").toString());
 					sendMail(authorization, null);
@@ -463,7 +425,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		String msg = null;
 		MDocType dt = new MDocType(movement.getCtx(), movement.getC_DocType_ID(), movement.get_TrxName());
 
-		if (!(dt.get_Value("SRI_ShortDocType") == null)) {
+		if (!(dt.get_Value("SRI_ShortDocType") == null) && !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
 			String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
 			movement.set_ValueOfColumn("IsElectronicDocument", true);
