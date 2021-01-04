@@ -75,7 +75,7 @@ public class LEC_FE_CreateAccessCode {
 		if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
 			ac.setValue(m_accesscode);
 
-		if (!ac.save()) {
+		if (!ac.save(trxName)) {
 			throw new AdempiereException("@SaveError@ No se pudo grabar SRI Access Code");
 
 		}
@@ -95,7 +95,7 @@ public class LEC_FE_CreateAccessCode {
 		a.set_ValueOfColumn("DocumentID", ID);
 		a.set_ValueOfColumn("IsToSend", true);
 
-		if (!a.save()) {
+		if (!a.save(trxName)) {
 			msg = "@SaveError@ No se pudo crear la autorizacion ";
 		} else {
 

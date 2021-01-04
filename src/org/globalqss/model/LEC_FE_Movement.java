@@ -148,7 +148,7 @@ public class LEC_FE_Movement extends MMovement {
 			MLocation bpl = new MLocation(getCtx(), getC_BPartner_Location().getC_Location_ID(), get_TrxName()); // TODO
 																													// Reviewme
 
-			msgStatus = "TaxIdTyp";
+			msgStatus = "TaxIdType";
 			X_LCO_TaxIdType ttc = new X_LCO_TaxIdType(getCtx(), (Integer) bp.get_Value("LCO_TaxIdType_ID"),
 					get_TrxName());
 
