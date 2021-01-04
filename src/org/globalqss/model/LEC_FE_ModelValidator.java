@@ -406,12 +406,20 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 	private String generateAccessCode(MMovement movement) {
 		
+		MDocType dt = new MDocType(movement.getCtx(), movement.getC_DocType_ID(), movement.get_TrxName());
+		
+		if (dt.get_Value("SRI_ShortDocType") !=null ) {
+		
 		X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(movement.getCtx(),
 				MMovement.COLUMNNAME_M_Movement_ID, movement.getAD_Org_ID(), movement.getAD_User_ID(),
 				movement.getM_Movement_ID(), movement.getC_DocType_ID(), movement.getMovementDate(),
 				movement.getDocumentNo(), movement.get_TrxName());
-
-		movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+		
+		if (movement.get_Value("SRI_Authorization_ID") !=null)
+			movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+		
+		}
+		
 		return null;
 	}
 
