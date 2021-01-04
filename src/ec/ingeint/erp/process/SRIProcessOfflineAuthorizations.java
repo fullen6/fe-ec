@@ -30,7 +30,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
-import org.adempiere.exceptions.AdempiereException;
 import org.adempiere.util.ProcessUtil;
 import org.compiere.model.MDocType;
 import org.compiere.model.MInOut;

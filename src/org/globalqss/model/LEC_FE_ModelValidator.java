@@ -843,11 +843,11 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 							+ Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - "
 							+ Msg.getElement(Env.getCtx(), X_LCO_TaxIdType.COLUMNNAME_LCO_TaxIdType_ID);
 				}
-				if (bp.get_Value(X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID) == null) {
+				/*if (bp.get_Value(X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID) == null) {
 					msg = Msg.translate(Env.getCtx(), "FillMandatory") + " "
 							+ Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - "
 							+ Msg.getElement(Env.getCtx(), X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID);
-				}
+				} */
 				if (dt.get_ValueAsString("SRI_ShortDocType").equals("05")
 						|| dt.get_ValueAsString("SRI_ShortDocType").equals("04")) {
 					if (invoice.get_Value("SRI_RefInvoice_ID") == null
