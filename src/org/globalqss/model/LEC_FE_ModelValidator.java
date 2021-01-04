@@ -121,6 +121,15 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			if (msg != null)
 				throw new RuntimeException(msg);
 		}
+		
+		if (po.get_TableName().equals(MMovement.Table_Name) && (type.equals(IEventTopics.DOC_AFTER_COMPLETE))) {
+			MMovement movement = (MMovement) po;
+			msg = generateAccessCode(movement);
+			if (msg != null)
+				throw new RuntimeException(msg);
+			
+			
+		}
 
 		// before completing SO invoice set SO DocumentNo -- Previene custom
 		// e-evolution Morder.completeIt
@@ -395,6 +404,17 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		}
 	}
 
+	private String generateAccessCode(MMovement movement) {
+		
+		X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(movement.getCtx(),
+				MMovement.COLUMNNAME_M_Movement_ID, movement.getAD_Org_ID(), movement.getAD_User_ID(),
+				movement.getM_Movement_ID(), movement.getC_DocType_ID(), movement.getMovementDate(),
+				movement.getDocumentNo(), movement.get_TrxName());
+
+		movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+		return null;
+	}
+
 	private void WarehouseOrder(MInOut inout) {
 
 		MDocType dt = new MDocType(inout.getCtx(), inout.getC_DocType_ID(), inout.get_TrxName());
@@ -469,16 +489,9 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 						throw new AdempiereException(Msg.translate(Env.getCtx(), "FillMandatory") + " "
 								+ Msg.getElement(Env.getCtx(), MMovement.COLUMNNAME_C_BPartner_Location_ID));
 				}
-
-				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(movement.getCtx(),
-						MMovement.COLUMNNAME_M_Movement_ID, movement.getAD_Org_ID(), movement.getAD_User_ID(),
-						movement.getM_Movement_ID(), movement.getC_DocType_ID(), movement.getMovementDate(),
-						movement.getDocumentNo(), movement.get_TrxName());
-
-				movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+			
 				movement.saveEx();
 			}
-
 		}
 		return msg;
 	}// Validate Movement - before complete
