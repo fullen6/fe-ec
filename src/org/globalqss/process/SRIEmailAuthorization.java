@@ -519,7 +519,6 @@ public class SRIEmailAuthorization extends SvrProcess
 			
 			if (file.exists() || file.isFile() || file.canRead()) {
 			 
-			    // file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesAutorizados);
 				file_name = file.getAbsolutePath();
 			
 			}

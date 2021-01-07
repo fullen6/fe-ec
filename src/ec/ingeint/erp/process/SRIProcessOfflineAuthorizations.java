@@ -50,37 +50,34 @@ import org.globalqss.util.LEC_FE_Utils;
 import org.globalqss.util.LEC_FE_UtilsXml;
 
 /**
- *	Generate Contingency Authorizations
- *	
- *  @author INGEINT/ocurieles
+ * Generate Contingency Authorizations
+ * 
+ * @author INGEINT/ocurieles
  */
-public class SRIProcessOfflineAuthorizations extends SvrProcess
-{
+public class SRIProcessOfflineAuthorizations extends SvrProcess {
 
-	/**	Client							*/
-	private int				m_AD_Client_ID = 0;
+	/** Client */
+	private int m_AD_Client_ID = 0;
 
-	/** Authorization					*/
-	private int			p_SRI_Authorization_ID = 0;
+	/** Authorization */
+	private int p_SRI_Authorization_ID = 0;
 
-	/** Number of authorizations	*/
-	private int			m_created = 0;
-
+	/** Number of authorizations */
+	private int m_created = 0;
 
 	private String file_name = "";
 
 	private String msgError = null;
 
 	/**
-	 *  Prepare - e.g., get Parameters.
+	 * Prepare - e.g., get Parameters.
 	 */
-	protected void prepare()
-	{
+	protected void prepare() {
 		ProcessInfoParameter[] para = getParameter();
-		for (int i = 0; i < para.length; i++)
-		{
+		for (int i = 0; i < para.length; i++) {
 			String name = para[i].getParameterName();
-			if (para[i].getParameter() == null);
+			if (para[i].getParameter() == null)
+				;
 
 			else if (name.equals("SRI_Authorization_ID"))
 				p_SRI_Authorization_ID = para[i].getParameterAsInt();
@@ -93,135 +90,121 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		if (p_SRI_Authorization_ID == 0)
 			p_SRI_Authorization_ID = getRecord_ID();
 
-	}	//	prepare
+	} // prepare
 
 	/**
-	 * 	Generate Invoices
-	 *	@return info
-	 *	@throws Exception
+	 * Generate Invoices
+	 * 
+	 * @return info
+	 * @throws Exception
 	 */
-	protected String doIt () throws Exception
-	{
+	protected String doIt() throws Exception {
 		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 		log.info("SRI_Authorization_ID=" + p_SRI_Authorization_ID);
 		//
 		String sql = null;
-		sql = "SELECT * FROM SRI_Authorization a "
-				+ " WHERE AD_Client_ID= ? "
-				+ "  AND IsActive = 'Y' AND Processed = 'N' "
-				+ "  AND isSRIOfflineSchema = 'Y' "
-				+ "  AND IsSRI_Error = 'N' "
-				+ "  AND IsToSend = 'N' ";
+		sql = "SELECT * FROM SRI_Authorization a " + " WHERE AD_Client_ID= ? "
+				+ "  AND IsActive = 'Y' AND Processed = 'N' " + "  AND isSRIOfflineSchema = 'Y' "
+				+ "  AND IsSRI_Error = 'N' " + "  AND IsToSend = 'N' ";
 		if (p_SRI_Authorization_ID != 0)
 			sql += " AND SRI_Authorization_ID= ? ";
 
 		PreparedStatement pstmt = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, get_TrxName());
+		try {
+			pstmt = DB.prepareStatement(sql, get_TrxName());
 			int index = 1;
 			pstmt.setInt(index++, m_AD_Client_ID);
 			if (p_SRI_Authorization_ID != 0)
 				pstmt.setInt(index++, p_SRI_Authorization_ID);
 
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			log.log(Level.SEVERE, sql, e);
 		}
 
 		return generate(pstmt);
 
-	}	//	doIt
-
+	} // doIt
 
 	/**
-	 * 	Generate Authorizations
-	 * 	@param pstmt order query 
-	 *	@return info
+	 * Generate Authorizations
+	 * 
+	 * @param pstmt order query
+	 * @return info
 	 */
-	private String generate (PreparedStatement pstmt)
-	{
-		
+	private String generate(PreparedStatement pstmt) {
+
 		String msg = null;
-		try
-		{
+		try {
 
-			ResultSet rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
 
-				msg= "";
-				X_SRI_Authorization authorization = new X_SRI_Authorization (getCtx(), rs, get_TrxName());
-				log.warning("To Process: "+authorization.get_ValueAsString("Value"));
+				msg = "";
+				X_SRI_Authorization authorization = new X_SRI_Authorization(getCtx(), rs, get_TrxName());
+				log.warning("To Process: " + authorization.get_ValueAsString("Value"));
 
 				// isSOTrx()
-				if (authorization.getSRI_ShortDocType().equals("01"))	// FACTURA
+				if (authorization.getSRI_ShortDocType().equals("01")) // FACTURA
 					msg = lecfeinvoice_SriExportInvoiceXML100(authorization);
 				else if (authorization.getSRI_ShortDocType().equals("03")) // LIQUIDACION DE COMPRAS
 					msg = lecfeinvoicePL_SRIExportInvoicePLXML100(authorization);
-				else if (authorization.getSRI_ShortDocType().equals("04"))	// NOTA DE CRÉDITO
+				else if (authorization.getSRI_ShortDocType().equals("04")) // NOTA DE CRÉDITO
 					msg = lecfeinvoice_SriExportInvoiceXML100(authorization);
-				else if (authorization.getSRI_ShortDocType().equals("05"))	// NOTA DE DÉBITO
+				else if (authorization.getSRI_ShortDocType().equals("05")) // NOTA DE DÉBITO
 					msg = lecfeinvoice_SriExportInvoiceXML100(authorization);
-				else if (authorization.getSRI_ShortDocType().equals("06")){
+				else if (authorization.getSRI_ShortDocType().equals("06")) {
 
-					if(LEC_FE_Utils.getAuthorisedInOut(authorization.getSRI_Authorization_ID()) > 0)
-						msg = lecfeinout_SriExportInOutXML100(authorization);//GUÍA DE REMISIÓN - Entrega
-					else if(LEC_FE_Utils.getAuthorisedMovement(authorization.getSRI_Authorization_ID()) > 0)
-						msg = lecfemovement_SriExportMovementXML100(authorization);//GUÍA DE REMISIÓN - Movimiento
-					else if (authorization.getDescription()!=null){
+					if (LEC_FE_Utils.getAuthorisedInOut(authorization.getSRI_Authorization_ID()) > 0)
+						msg = lecfeinout_SriExportInOutXML100(authorization);// GUÍA DE REMISIÓN - Entrega
+					else if (LEC_FE_Utils.getAuthorisedMovement(authorization.getSRI_Authorization_ID()) > 0)
+						msg = lecfemovement_SriExportMovementXML100(authorization);// GUÍA DE REMISIÓN - Movimiento
+					else if (authorization.getDescription() != null) {
 						if (authorization.getDescription().endsWith("-Movimiento"))
-							msg = lecfemovement_SriExportMovementXML100(authorization);//GUÍA DE REMISIÓN - Movimiento
+							msg = lecfemovement_SriExportMovementXML100(authorization);// GUÍA DE REMISIÓN - Movimiento
 						else
-							msg = lecfeinout_SriExportInOutXML100(authorization);//GUÍA DE REMISIÓN - Entrega
+							msg = lecfeinout_SriExportInOutXML100(authorization);// GUÍA DE REMISIÓN - Entrega
 					}
 				}
 
 				// !isSOTrx()
-				else if (authorization.getSRI_ShortDocType().equals("07"))	// COMPROBANTE DE RETENCIÓN
+				else if (authorization.getSRI_ShortDocType().equals("07")) // COMPROBANTE DE RETENCIÓN
 					msg = lecfeinvoice_SriExportInvoiceXML100(authorization);
 				else
 					log.warning("Formato no habilitado SRI: " + authorization.getSRI_ShortDocType());
 
-				if(msg!="" && msg!=null)
+				if (msg != "" && msg != null)
 					log.log(Level.SEVERE, msg);
 
-			}	//	for all authorizations
-			rs.close ();
-			pstmt.close ();
+			} // for all authorizations
+			rs.close();
+			pstmt.close();
 			pstmt = null;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			log.log(Level.SEVERE, msg, e);
-			//return "Error:"+msgError+e.getMessage();
+			// return "Error:"+msgError+e.getMessage();
 		}
-		try
-		{
+		try {
 			if (pstmt != null)
-				pstmt.close ();
+				pstmt.close();
 			pstmt = null;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			pstmt = null;
 		}
 
 		return "@Created@ = " + m_created;
-	}	//	generate
-	
+	} // generate
+
 	/**
 	 * lecfeinvoicePL_SRIExportInvoicePLXML100
 	 */
-	
-	public String lecfeinvoicePL_SRIExportInvoicePLXML100 (X_SRI_Authorization authorization) {
-		
+
+	public String lecfeinvoicePL_SRIExportInvoicePLXML100(X_SRI_Authorization authorization) {
+
 		String msg = null;
-		
+
 		int c_invoice_id = LEC_FE_Utils.getAuthorisedInvoicePL(authorization.getSRI_Authorization_ID());
-		
-		if(c_invoice_id<=0) {
+
+		if (c_invoice_id <= 0) {
 			authorization.set_ValueOfColumn("IsSRI_Error", true);
 			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
 			authorization.saveEx();
@@ -230,20 +213,23 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 			msgError = msg;
 			return msg;
 		}
-		
+
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 		MInvoice invoice = new MInvoice(getCtx(), c_invoice_id, get_TrxName());
 		MDocType dt = new MDocType(getCtx(), invoice.getC_DocTypeTarget_ID(), get_TrxName());
 
 		String coddoc = dt.get_ValueAsString("SRI_ShortDocType");
-		
+
 		try {
 
-			X_SRI_AccessCode accesscode = new X_SRI_AccessCode (getCtx(), authorization.getSRI_AccessCode_ID(), get_TrxName());
-			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(invoice.getDateInvoiced(),9) + "-" + accesscode.getValue() + "_sig.xml";
+			X_SRI_AccessCode accesscode = new X_SRI_AccessCode(getCtx(), authorization.getSRI_AccessCode_ID(),
+					get_TrxName());
+			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(invoice.getDateInvoiced(), 9) + "-"
+					+ accesscode.getValue() + "_sig.xml";
 
-			//ruta completa del archivo xml
-			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesAutorizados + File.separator + xmlFileName;
+			// ruta completa del archivo xml
+			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesAutorizados
+					+ File.separator + xmlFileName;
 
 			log.warning("@Authorizing Xml@ -> " + file_name);
 			signature.setResource_To_Sign(file_name);
@@ -258,19 +244,19 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 			m_created++;
 
-			if (invoice.get_Value("SRI_AuthorizationPL_ID")==null){
+			if (invoice.get_Value("SRI_AuthorizationPL_ID") == null) {
 				invoice.set_ValueOfColumn("SRI_AuthorizationPL_ID", authorization.getSRI_Authorization_ID());
 				invoice.saveEx();
 			}
 
-			if (authorization.getAD_UserMail()==null){
+			if (authorization.getAD_UserMail() == null) {
 				authorization.setAD_UserMail_ID(invoice.getAD_User_ID());
 				authorization.saveEx();
 			}
 
 			Trx sriTrx = null;
 			sriTrx = Trx.get(invoice.get_TrxName(), false);
-			if (sriTrx != null) 
+			if (sriTrx != null)
 				sriTrx.commit();
 
 			invoice.load(sriTrx.getTrxName());
@@ -285,19 +271,16 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		return msg;
 
 	} // lecfeinvoicePL_SRIExportInvoicePLXML100
-		
-	
-
 
 	/**
-	 * 	lecfeinvoice_SriExportInvoiceXML100
+	 * lecfeinvoice_SriExportInvoiceXML100
 	 */
-	public String lecfeinvoice_SriExportInvoiceXML100 (X_SRI_Authorization authorization) {
+	public String lecfeinvoice_SriExportInvoiceXML100(X_SRI_Authorization authorization) {
 		String msg = null;
 
 		int c_invoice_id = LEC_FE_Utils.getAuthorisedInvoice(authorization.getSRI_Authorization_ID());
 
-		if(c_invoice_id<=0) {
+		if (c_invoice_id <= 0) {
 			msg = "Error obteniendo Factura";
 			authorization.set_ValueOfColumn("IsSRI_Error", true);
 			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
@@ -315,11 +298,14 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 		try {
 
-			X_SRI_AccessCode accesscode = new X_SRI_AccessCode (getCtx(), authorization.getSRI_AccessCode_ID(), get_TrxName());
-			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(invoice.getDateInvoiced(),9) + "-" + accesscode.getValue() + "_sig.xml";
+			X_SRI_AccessCode accesscode = new X_SRI_AccessCode(getCtx(), authorization.getSRI_AccessCode_ID(),
+					get_TrxName());
+			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(invoice.getDateInvoiced(), 9) + "-"
+					+ accesscode.getValue() + "_sig.xml";
 
-			//ruta completa del archivo xml
-			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesAutorizados + File.separator + xmlFileName;
+			// ruta completa del archivo xml
+			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesAutorizados
+					+ File.separator + xmlFileName;
 
 			log.warning("@Authorizing Xml@ -> " + file_name);
 			signature.setResource_To_Sign(file_name);
@@ -334,19 +320,19 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 			m_created++;
 
-			if (invoice.get_Value("SRI_Authorization_ID")==null){
+			if (invoice.get_Value("SRI_Authorization_ID") == null) {
 				invoice.set_ValueOfColumn("SRI_Authorization_ID", authorization.getSRI_Authorization_ID());
 				invoice.saveEx();
 			}
 
-			if (authorization.getAD_UserMail()==null){
+			if (authorization.getAD_UserMail() == null) {
 				authorization.setAD_UserMail_ID(invoice.getAD_User_ID());
 				authorization.saveEx();
 			}
 
 			Trx sriTrx = null;
 			sriTrx = Trx.get(invoice.get_TrxName(), false);
-			if (sriTrx != null) 
+			if (sriTrx != null)
 				sriTrx.commit();
 
 			invoice.load(sriTrx.getTrxName());
@@ -363,15 +349,14 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 	} // lecfeinvoice_SriExportInvoiceXML100
 
 	/**
-	 * 	lecfeinout_SriExportInOutXML100
+	 * lecfeinout_SriExportInOutXML100
 	 */
-	public String lecfeinout_SriExportInOutXML100 (X_SRI_Authorization authorization)
-	{
+	public String lecfeinout_SriExportInOutXML100(X_SRI_Authorization authorization) {
 		String msg = null;
 
 		int c_inout_id = LEC_FE_Utils.getAuthorisedInOut(authorization.getSRI_Authorization_ID());
 
-		if(c_inout_id==0) {
+		if (c_inout_id == 0) {
 			msg = "Error obteniendo Entrada/Salida";
 			authorization.set_ValueOfColumn("IsSRI_Error", true);
 			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
@@ -389,11 +374,14 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 		try {
 
-			X_SRI_AccessCode accesscode = new X_SRI_AccessCode (getCtx(), authorization.getSRI_AccessCode_ID(), get_TrxName());
-			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(inout.getMovementDate(),9) + "-" + accesscode.getValue() + "_sig.xml";
+			X_SRI_AccessCode accesscode = new X_SRI_AccessCode(getCtx(), authorization.getSRI_AccessCode_ID(),
+					get_TrxName());
+			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(inout.getMovementDate(), 9) + "-"
+					+ accesscode.getValue() + "_sig.xml";
 
-			//ruta completa del archivo xml
-			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesFirmados + File.separator + xmlFileName;
+			// ruta completa del archivo xml
+			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesFirmados
+					+ File.separator + xmlFileName;
 
 			log.warning("@Authorizing Xml@ -> " + file_name);
 
@@ -410,19 +398,19 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 			m_created++;
 
-			if (inout.get_Value("SRI_Authorization_ID")==null){
+			if (inout.get_Value("SRI_Authorization_ID") == null) {
 				inout.set_ValueOfColumn("SRI_Authorization_ID", authorization.getSRI_Authorization_ID());
 				inout.saveEx();
 			}
 
-			if (authorization.getAD_UserMail()==null){
+			if (authorization.getAD_UserMail() == null) {
 				authorization.setAD_UserMail_ID(inout.getAD_User_ID());
 				authorization.saveEx();
 			}
 
 			Trx sriTrx = null;
 			sriTrx = Trx.get(inout.get_TrxName(), false);
-			if (sriTrx != null) 
+			if (sriTrx != null)
 				sriTrx.commit();
 
 			inout.load(sriTrx.getTrxName());
@@ -436,19 +424,16 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		return msg;
 
 	} // lecfeinout_SriExportInOutXML100
-	
-	
 
 	/**
-	 * 	lecfemovement_SriExportMovementXML100
+	 * lecfemovement_SriExportMovementXML100
 	 */
-	public String lecfemovement_SriExportMovementXML100 (X_SRI_Authorization authorization)
-	{
+	public String lecfemovement_SriExportMovementXML100(X_SRI_Authorization authorization) {
 		String msg = null;
 
 		int c_movement_id = LEC_FE_Utils.getAuthorisedMovement(authorization.getSRI_Authorization_ID());
 
-		if(c_movement_id==0) {
+		if (c_movement_id == 0) {
 			msg = "Error obteniendo Movimiento";
 			authorization.set_ValueOfColumn("IsSRI_Error", true);
 			authorization.set_ValueOfColumn("SRI_BugInventory", msg);
@@ -466,11 +451,14 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 
 		try {
 
-			X_SRI_AccessCode accesscode = new X_SRI_AccessCode (getCtx(), authorization.getSRI_AccessCode_ID(), get_TrxName());
-			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(movement.getMovementDate(),9) + "-" + accesscode.getValue() + "_sig.xml";
+			X_SRI_AccessCode accesscode = new X_SRI_AccessCode(getCtx(), authorization.getSRI_AccessCode_ID(),
+					get_TrxName());
+			String xmlFileName = "SRI_" + coddoc + "-" + LEC_FE_Utils.getDate(movement.getMovementDate(), 9) + "-"
+					+ accesscode.getValue() + "_sig.xml";
 
-			//ruta completa del archivo xml
-			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesFirmados + File.separator + xmlFileName;
+			// ruta completa del archivo xml
+			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesFirmados
+					+ File.separator + xmlFileName;
 
 			log.warning("@Authorizing Xml@ -> " + file_name);
 
@@ -484,22 +472,22 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 				authorization.saveEx();
 				return msg;
 			}
-			
+
 			m_created++;
 
-			if (movement.get_Value("SRI_Authorization_ID")==null){
+			if (movement.get_Value("SRI_Authorization_ID") == null) {
 				movement.set_ValueOfColumn("SRI_Authorization_ID", authorization.getSRI_Authorization_ID());
 				movement.saveEx();
 			}
 
-			if (authorization.getAD_UserMail()==null){
+			if (authorization.getAD_UserMail() == null) {
 				authorization.setAD_UserMail_ID(movement.getAD_User_ID());
 				authorization.saveEx();
 			}
 
 			Trx sriTrx = null;
 			sriTrx = Trx.get(movement.get_TrxName(), false);
-			if (sriTrx != null) 
+			if (sriTrx != null)
 				sriTrx.commit();
 
 			movement.load(sriTrx.getTrxName());
@@ -517,19 +505,17 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 	} // lecfemovement_SriExportMovementXML100
 
 	public static void sendMail(int p_authorization, Trx trx) {
-		MProcess process = new Query(Env.getCtx(), MProcess.Table_Name,
-				"classname = ?", null).setParameters(
-						"org.globalqss.process.SRIEmailAuthorization").first();
+		MProcess process = new Query(Env.getCtx(), MProcess.Table_Name, "classname = ?", null)
+				.setParameters("org.globalqss.process.SRIEmailAuthorization").first();
 		if (process != null) {
 
-			ProcessInfo processInfo = new ProcessInfo(process.getName(),
-					process.get_ID());
-			MPInstance instance = new MPInstance(Env.getCtx(),
-					processInfo.getAD_Process_ID(), processInfo.getRecord_ID());
+			ProcessInfo processInfo = new ProcessInfo(process.getName(), process.get_ID());
+			MPInstance instance = new MPInstance(Env.getCtx(), processInfo.getAD_Process_ID(),
+					processInfo.getRecord_ID());
 			instance.save();
 
-			ProcessInfoParameter[] para = { new ProcessInfoParameter(
-					"SRI_Authorization_ID", p_authorization, null, null, null) };
+			ProcessInfoParameter[] para = {
+					new ProcessInfoParameter("SRI_Authorization_ID", p_authorization, null, null, null) };
 			processInfo.setAD_Process_ID(process.get_ID());
 			processInfo.setClassName(process.getClassname());
 			processInfo.setAD_PInstance_ID(instance.getAD_PInstance_ID());
@@ -539,5 +525,4 @@ public class SRIProcessOfflineAuthorizations extends SvrProcess
 		}
 	}
 
-}	//	SRIProcessOfflineAuthorizations
-
+} // SRIProcessOfflineAuthorizations

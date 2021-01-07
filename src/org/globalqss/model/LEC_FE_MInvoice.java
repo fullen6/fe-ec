@@ -949,6 +949,8 @@ public class LEC_FE_MInvoice extends MInvoice {
 				} else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 					String invoiceNo = getDocumentNo();
 					String invoiceID = String.valueOf(get_ID());
+					a.set_ValueOfColumn("IsToSend", false);
+					a.saveEx();					
 					this.saveEx();
 					return msg;
 				}
