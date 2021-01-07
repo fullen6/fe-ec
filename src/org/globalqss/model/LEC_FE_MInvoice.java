@@ -957,9 +957,6 @@ public class LEC_FE_MInvoice extends MInvoice {
 
 			if (!msg.equals("RECIBIDA")) {
 
-				DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
-						get_TrxName());
-
 				int exist = DB.getSQLValue(null,
 						"SELECT Record_id FROM AD_Note WHERE AD_Table_ID = 318 AND Record_ID=? ", get_ID());
 
