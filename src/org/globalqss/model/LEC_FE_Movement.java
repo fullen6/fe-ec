@@ -92,7 +92,8 @@ public class LEC_FE_Movement extends MMovement {
 					MSysConfig.getValue("QSSLEC_FE_ClaveCertificadoDigital", null, getAD_Client_ID(), getAD_Org_ID()));
 
 			if (signature.getFolderRaiz() == null)
-				return ErrorDocumentno + "No existe parametro para Ruta Generacion Xml";
+				log.info("No existe parametro para Ruta de Generacion XML");
+				//return ErrorDocumentno + "No existe parametro para Ruta Generacion Xml";
 
 			MDocType dt = new MDocType(getCtx(), getC_DocType_ID(), get_TrxName());
 

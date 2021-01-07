@@ -60,7 +60,7 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 	/** Number of authorizations */
 	private int m_created = 0;
 
-	String[] m_tables = { "C_Invoice", "M_Movement", "M_InOut" };
+	String[] m_tables = { "M_Movement", "C_Invoice", "M_InOut" };
 
 	private static CLogger log = CLogger.getCLogger(LEC_FE_ModelValidator.class);
 
@@ -290,7 +290,6 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 			msg = "No existe definicion SRI_ShortDocType: " + dt.toString();
 			log.info("Invoice: " + movement.toString() + msg);
 
-			// if (LEC_FE_Utils.breakDialog(msg)) return "Cancelado..."; // Temp
 		}
 
 		MUser user = new MUser(movement.getCtx(), movement.getAD_User_ID(), movement.get_TrxName());
