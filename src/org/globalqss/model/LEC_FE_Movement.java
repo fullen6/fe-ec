@@ -472,8 +472,6 @@ public class LEC_FE_Movement extends MMovement {
 
 			}
 
-//		if (LEC_FE_Utils.breakDialog("Completando Movimiento")) return "Cancelado...";	// TODO Temp
-
 			//
 		} catch (Exception e) {
 			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();

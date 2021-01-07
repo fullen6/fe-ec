@@ -135,21 +135,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		// e-evolution Morder.completeIt
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_BEFORE_COMPLETE)) {
 
-			MInvoice invoice = (MInvoice) po;
-
-			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
-
-			if (dt.get_ValueAsString("SRI_ShortDocType") != null
-					&& !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
-
-				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(),
-						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
-						invoice.getC_Invoice_ID(), invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(),
-						invoice.getDocumentNo(), invoice.get_TrxName());
-
-				invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
-				invoice.saveEx();
-			}
+			MInvoice invoice = (MInvoice) po;			
 
 			if (MDocType.DOCSUBTYPESO_OnCreditOrder.equals(invoice.getC_Order().getC_DocType().getDocSubTypeSO())) { // (W)illCall(I)nvoice
 				invoice.setDocumentNo(invoice.getC_Order().getDocumentNo());
@@ -165,14 +151,21 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		// after completing SO invoice process electronic invoice
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_COMPLETE)) {
 			MInvoice invoice = (MInvoice) po;
-			MDocType dt = new MDocType(invoice.getCtx(), invoice.getC_DocTypeTarget_ID(), invoice.get_TrxName());
-			String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
+			
+			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
 
-			if (invoice.getC_Order_ID() > 0) {
-				MDocType dto = new MDocType(invoice.getCtx(), invoice.getC_Order().getC_DocType_ID(),
-						invoice.get_TrxName());
+			if (dt.get_ValueAsString("SRI_ShortDocType") != null
+					&& !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
 
+				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(),
+						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
+						invoice.getC_Invoice_ID(), invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(),
+						invoice.getDocumentNo(), invoice.get_TrxName());
+
+				invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+				invoice.saveEx();
 			}
+			
 		}
 
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_PREPARE)) {
@@ -181,12 +174,6 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			MInvoice invoice = (MInvoice) po;
 			MDocType dt = new MDocType(invoice.getCtx(), invoice.getC_DocTypeTarget_ID(), invoice.get_TrxName());
 			String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
-
-			if (invoice.getC_Order_ID() > 0) {
-				MDocType dto = new MDocType(invoice.getCtx(), invoice.getC_Order().getC_DocType_ID(),
-						invoice.get_TrxName());
-
-			}
 
 			if (isOfflineSchema && shortdoctype != "")
 				invoice.set_ValueOfColumn("isSRIOfflineSchema", "Y");
