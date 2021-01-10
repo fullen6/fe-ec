@@ -121,21 +121,20 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			if (msg != null)
 				throw new RuntimeException(msg);
 		}
-		
+
 		if (po.get_TableName().equals(MMovement.Table_Name) && (type.equals(IEventTopics.DOC_AFTER_COMPLETE))) {
 			MMovement movement = (MMovement) po;
 			msg = generateAccessCode(movement);
 			if (msg != null)
 				throw new RuntimeException(msg);
-			
-			
+
 		}
 
 		// before completing SO invoice set SO DocumentNo -- Previene custom
 		// e-evolution Morder.completeIt
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_BEFORE_COMPLETE)) {
 
-			MInvoice invoice = (MInvoice) po;			
+			MInvoice invoice = (MInvoice) po;
 
 			if (MDocType.DOCSUBTYPESO_OnCreditOrder.equals(invoice.getC_Order().getC_DocType().getDocSubTypeSO())) { // (W)illCall(I)nvoice
 				invoice.setDocumentNo(invoice.getC_Order().getDocumentNo());
@@ -151,21 +150,29 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		// after completing SO invoice process electronic invoice
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_COMPLETE)) {
 			MInvoice invoice = (MInvoice) po;
-			
+
 			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
+			X_SRI_Authorization auth = new X_SRI_Authorization(invoice.getCtx(), 0, invoice.get_TrxName());
 
 			if (dt.get_ValueAsString("SRI_ShortDocType") != null
 					&& !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
 
-				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(),
-						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
-						invoice.getC_Invoice_ID(), invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(),
-						invoice.getDocumentNo(), invoice.get_TrxName());
+				String documentno = invoice.getDocumentNo();
+
+				if (dt.get_ValueAsString("SRI_ShortDocType").equals("07") && !invoice.isSOTrx()
+						&& new BigDecimal(invoice.get_ValueAsString("WithholdingAmt")).signum() > 0) {
+					documentno = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+
+					}
+
+				auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(), MInvoice.COLUMNNAME_C_Invoice_ID,
+						invoice.getAD_Org_ID(), invoice.getAD_User_ID(), invoice.getC_Invoice_ID(),
+						invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(), documentno, invoice.get_TrxName());
 
 				invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
 				invoice.saveEx();
 			}
-			
+
 		}
 
 		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_PREPARE)) {
@@ -392,21 +399,21 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 	}
 
 	private String generateAccessCode(MMovement movement) {
-		
+
 		MDocType dt = new MDocType(movement.getCtx(), movement.getC_DocType_ID(), movement.get_TrxName());
-		
-		if (dt.get_Value("SRI_ShortDocType") !=null ) {
-		
-		X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(movement.getCtx(),
-				MMovement.COLUMNNAME_M_Movement_ID, movement.getAD_Org_ID(), movement.getAD_User_ID(),
-				movement.getM_Movement_ID(), movement.getC_DocType_ID(), movement.getMovementDate(),
-				movement.getDocumentNo(), movement.get_TrxName());
-		
-		if (movement.get_Value("SRI_Authorization_ID") !=null)
-			movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
-		
+
+		if (dt.get_Value("SRI_ShortDocType") != null) {
+
+			X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(movement.getCtx(),
+					MMovement.COLUMNNAME_M_Movement_ID, movement.getAD_Org_ID(), movement.getAD_User_ID(),
+					movement.getM_Movement_ID(), movement.getC_DocType_ID(), movement.getMovementDate(),
+					movement.getDocumentNo(), movement.get_TrxName());
+
+			if (movement.get_Value("SRI_Authorization_ID") != null)
+				movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+
 		}
-		
+
 		return null;
 	}
 
@@ -484,7 +491,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 						throw new AdempiereException(Msg.translate(Env.getCtx(), "FillMandatory") + " "
 								+ Msg.getElement(Env.getCtx(), MMovement.COLUMNNAME_C_BPartner_Location_ID));
 				}
-			
+
 				movement.saveEx();
 			}
 		}
@@ -851,11 +858,13 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 							+ Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - "
 							+ Msg.getElement(Env.getCtx(), X_LCO_TaxIdType.COLUMNNAME_LCO_TaxIdType_ID);
 				}
-				/*if (bp.get_Value(X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID) == null) {
-					msg = Msg.translate(Env.getCtx(), "FillMandatory") + " "
-							+ Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - "
-							+ Msg.getElement(Env.getCtx(), X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID);
-				} */
+				/*
+				 * if (bp.get_Value(X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID) == null)
+				 * { msg = Msg.translate(Env.getCtx(), "FillMandatory") + " " +
+				 * Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - " +
+				 * Msg.getElement(Env.getCtx(),
+				 * X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID); }
+				 */
 				if (dt.get_ValueAsString("SRI_ShortDocType").equals("05")
 						|| dt.get_ValueAsString("SRI_ShortDocType").equals("04")) {
 					if (invoice.get_Value("SRI_RefInvoice_ID") == null

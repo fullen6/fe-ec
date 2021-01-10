@@ -79,9 +79,10 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 	public String lecfeinvret_SriExportRetencionXML100() {
 		String msgStatus = "";
-		
-		LEC_FE_MRetencion wh = new LEC_FE_MRetencion(getCtx(), getC_Invoice_ID(), get_TrxName());		
-		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), wh.get_ValueAsInt("SRI_Authorization_ID"), get_TrxName()); 
+
+		LEC_FE_MRetencion wh = new LEC_FE_MRetencion(getCtx(), getC_Invoice_ID(), get_TrxName());
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), wh.get_ValueAsInt("SRI_Authorization_ID"),
+				get_TrxName());
 
 		String msg = null;
 		String ErrorDocumentno = "Error en Retención No " + getDocumentNo() + " ";
@@ -89,7 +90,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 
 		try {
-			//log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
+			// log.log(Level.WARNING, "Documento a procesar: "+getDocumentNo());
 			signature.setAD_Org_ID(getAD_Org_ID());
 
 			m_identificacionconsumidor = MSysConfig.getValue("QSSLEC_FE_IdentificacionConsumidorFinal", null,
@@ -169,10 +170,10 @@ public class LEC_FE_MRetencion extends MInvoice {
 				return ErrorDocumentno + "Error en retención no encontrada";
 			if (m_retencionno.length() < 17)
 				return ErrorDocumentno + "Error en longitud del número de retención";
-			
+
 			// IsUseContingency
 			int sri_accesscode_id = 0;
-			
+
 			OutputStream mmDocStream = null;
 
 			String xmlFileName = "SRI_" + m_coddoc + "-" + LEC_FE_Utils.getDate(getDateInvoiced(), 9) + "-"
@@ -211,7 +212,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 			atts.clear();
 			atts.addAttribute("", "", "id", "CDATA", "comprobante");
 			atts.addAttribute("", "", "version", "CDATA", f.get_ValueAsString("VersionNo"));
-			
+
 			mmDoc.startElement("", "", f.get_ValueAsString("XmlPrintLabel"), atts);
 
 			atts.clear();
@@ -332,7 +333,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 				}
 
 				mmDoc.endElement("", "", "impuestos");
-				
+
 				if (oi.get_ValueAsBoolean("IsMicroBusiness")) {
 
 					mmDoc.startElement("", "", "infoAdicional", atts);
@@ -345,9 +346,9 @@ public class LEC_FE_MRetencion extends MInvoice {
 					mmDoc.endElement("", "", "infoAdicional");
 
 				}
-				
+
 				if (oi.get_ValueAsBoolean("IsWithholdingAgent")) {
-					
+
 					mmDoc.startElement("", "", "infoAdicional", atts);
 					atts.clear();
 					atts.addAttribute("", "", "nombre", "CDATA", "Agente de Retencion");
@@ -356,9 +357,9 @@ public class LEC_FE_MRetencion extends MInvoice {
 					mmDoc.characters(valor.toCharArray(), 0, valor.length());
 					mmDoc.endElement("", "", "campoAdicional");
 					mmDoc.endElement("", "", "infoAdicional");
-					
+
 				}
-				
+
 				rs.close();
 				pstmt.close();
 			} catch (SQLException e) {
@@ -405,7 +406,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 			file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesFirmados);
 
-			if (!signature.IsUseContingency) {				
+			if (!signature.IsUseContingency) {
 
 				// Procesar Recepcion SRI
 				log.warning("@Sending Xml@ -> " + file_name);
@@ -413,15 +414,21 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 				if (msg != null)
 
-					if (msg.contains("ERROR-65"))
-						DB.executeUpdateEx(
-								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
-								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
-					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
-						
-						this.saveEx();
-						return ErrorDocumentno + msg;
+					if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+						a.set_ValueOfColumn("IsToSend", false);
+						a.saveEx();
+
 					}
+
+				if (msg.contains("ERROR-65"))
+					DB.executeUpdateEx(
+							"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
+							new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
+				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
+
+					this.saveEx();
+					return ErrorDocumentno + msg;
+				}
 
 				if (!msg.equals("RECIBIDA")) {
 					String DocumentNo = DB.getSQLValueString(get_TrxName(),
@@ -443,13 +450,14 @@ public class LEC_FE_MRetencion extends MInvoice {
 
 					return ErrorDocumentno + msg;
 				}
-				
+
 				// Procesar Autorizacion SRI
 				// 04/07/2016 MHG Offline Schema added
 				if (!isOfflineSchema) {
 					log.warning("@Authorizing Xml@ -> " + file_name);
 					try {
-						msg = signature.respuestaAutorizacionComprobante((X_SRI_AccessCode) a.getSRI_AccessCode(), a, a.getSRI_AccessCode().getValue());
+						msg = signature.respuestaAutorizacionComprobante((X_SRI_AccessCode) a.getSRI_AccessCode(), a,
+								a.getSRI_AccessCode().getValue());
 
 						if (msg != null) {
 							return ErrorDocumentno + msg;
@@ -493,6 +501,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 		}
 
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
+		a.set_ValueOfColumn("IsToSend", false);
 		a.saveEx();
 		set_Value("SRI_Authorization_ID", a.get_ID());
 		this.saveEx();
@@ -580,7 +589,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 		if (!generalSequenceNo.equalsIgnoreCase(""))
 			nosecuencia += generalSequenceNo;
 
-		return "No. de Retención Generado " + nosecuencia;
+		return nosecuencia;
 	}
 
 	private static X_LLA_WithholdingSequence getSqlToWithholdingSequenceNo(MLCOInvoiceWithholding wth,

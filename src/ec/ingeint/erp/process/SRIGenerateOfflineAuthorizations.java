@@ -25,6 +25,7 @@
 **********************************************************************/
 package ec.ingeint.erp.process;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
@@ -97,13 +98,11 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 			//
 			String sql = null;
 
-			sql = "SELECT * "
-					+ "FROM " + table + " a "
-							+ "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
-							+ "JOIN SRI_Authorization au on au.SRI_Authorization_ID = a.SRI_Authorization_ID "
-							+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
-							+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus = 'CO' "
-							+ " AND a.issri_error = 'N' AND dt.sri_shortdoctype notnull AND au.IsToSend = 'Y' ";
+			sql = "SELECT * " + "FROM " + table + " a " + "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
+					+ "JOIN SRI_Authorization au on au.SRI_Authorization_ID = a.SRI_Authorization_ID "
+					+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
+					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus = 'CO' "
+					+ " AND a.issri_error = 'N' AND dt.sri_shortdoctype notnull AND au.IsToSend = 'Y' ";
 
 			PreparedStatement pstmt = null;
 			try {
@@ -214,11 +213,12 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 		} else if (shortdoctype.equals("03")) { // LIQUIDACION DE COMPRAS
 			msg = lecfeinvpl.lecfeinv_SriExportInvoicePLXML100();
 		} else if (shortdoctype.equals("07")) { // COMPROBANTE DE RETENCIÓN
-			if (lecfeinvret.get_ValueAsInt("SRI_Authorization_ID") < 1 && MSysConfig
-					.getBooleanValue("LEC_GenerateWitholdingToComplete", false, lecfeinvret.getAD_Client_ID())) {
+			if (lecfeinvret.get_ValueAsInt("SRI_Authorization_ID") < 1
+					&& new BigDecimal(lecfeinvret.get_ValueAsString("WithholdingAmt")).signum() > 0) {
 				LEC_FE_MRetencion.generateWitholdingNo(inv);
-				msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
+				
 			}
+			msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
 		} else
 			log.warning("Formato no habilitado SRI: " + dt.toString() + shortdoctype);
 
