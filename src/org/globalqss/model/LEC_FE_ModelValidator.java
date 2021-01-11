@@ -38,6 +38,8 @@ import org.globalqss.util.LEC_FE_CreateAccessCode;
 import org.globalqss.util.LEC_FE_Utils;
 import org.osgi.service.event.Event;
 
+import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
+
 public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 	/** Logger */
@@ -159,18 +161,33 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 				String documentno = invoice.getDocumentNo();
 
-				if (dt.get_ValueAsString("SRI_ShortDocType").equals("07") && !invoice.isSOTrx()
-						&& new BigDecimal(invoice.get_ValueAsString("WithholdingAmt")).signum() > 0) {
-					documentno = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+				Boolean CreateAccesCode = true;
 
+				if (dt.get_ValueAsString("SRI_ShortDocType").equals("07") && !invoice.isSOTrx()) {
+
+					int count = DB.getSQLValue(invoice.get_TrxName(),
+							"SELECT COUNT(*) " + "FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ",
+							invoice.getC_Invoice_ID());
+
+					if (count <= 0) {
+						CreateAccesCode = false;
+					} else {
+						documentno = LEC_FE_MRetencion.generateWitholdingNo(invoice);
 					}
+				}
 
-				auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(), MInvoice.COLUMNNAME_C_Invoice_ID,
-						invoice.getAD_Org_ID(), invoice.getAD_User_ID(), invoice.getC_Invoice_ID(),
-						invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(), documentno, invoice.get_TrxName());
+				if (CreateAccesCode) {
 
-				invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
-				invoice.saveEx();
+					auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(), MInvoice.COLUMNNAME_C_Invoice_ID,
+							invoice.getAD_Org_ID(), invoice.getAD_User_ID(), invoice.getC_Invoice_ID(),
+							invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(), documentno,
+							invoice.get_TrxName());
+
+					invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+					invoice.saveEx();
+
+				}
+
 			}
 
 		}

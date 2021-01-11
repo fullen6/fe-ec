@@ -9,6 +9,7 @@ import org.compiere.model.MInvoice;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.globalqss.model.LEC_FE_MRetencion;
 import org.globalqss.model.X_SRI_Authorization;
@@ -58,7 +59,7 @@ public class SRIGenerateAccesCode extends SvrProcess {
 
 		}
 
-		where = "sri_authorization_id Is Null and issriofflineschema = 'Y' AND IssoTrx='N' ";
+		where = "sri_authorization_id Is Null and issriofflineschema = 'Y' AND IssoTrx= 'N' ";
 
 		invoices = new Query(getCtx(), MInvoice.Table_Name, where, get_TrxName()).list();
 
@@ -70,9 +71,14 @@ public class SRIGenerateAccesCode extends SvrProcess {
 			log.warning("Factura a procesar: " + invoice.getDocumentNo());
 
 			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
+			
+			int count = DB.getSQLValue(invoice.get_TrxName(),
+					"SELECT COUNT(*) " + "FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ",
+					invoice.getC_Invoice_ID());
+
 
 			if (dt.get_ValueAsString("SRI_ShortDocType") != null && !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()
-					&& new BigDecimal(invoice.get_ValueAsString("WithholdingAmt")).signum() > 0) {
+					&& count > 0 ) {
 
 				String seq = LEC_FE_MRetencion.generateWitholdingNo(invoice);
 
