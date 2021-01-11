@@ -38,8 +38,6 @@ import org.globalqss.util.LEC_FE_CreateAccessCode;
 import org.globalqss.util.LEC_FE_Utils;
 import org.osgi.service.event.Event;
 
-import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-
 public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 	/** Logger */
@@ -157,7 +155,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			X_SRI_Authorization auth = new X_SRI_Authorization(invoice.getCtx(), 0, invoice.get_TrxName());
 
 			if (dt.get_ValueAsString("SRI_ShortDocType") != null
-					&& !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()) {
+					&& !dt.get_ValueAsString("SRI_ShortDocType").isEmpty() && invoice.getGrandTotal().signum() > 0 ) {
 
 				String documentno = invoice.getDocumentNo();
 

@@ -1,6 +1,5 @@
 package ec.ingeint.erp.process;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -10,7 +9,6 @@ import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
-import org.compiere.util.Env;
 import org.globalqss.model.LEC_FE_MRetencion;
 import org.globalqss.model.X_SRI_Authorization;
 import org.globalqss.util.LEC_FE_CreateAccessCode;
@@ -45,6 +43,9 @@ public class SRIGenerateAccesCode extends SvrProcess {
 		total = invoices.size();
 
 		for (MInvoice invoice : invoices) {
+			
+			if (invoice.getGrandTotal().signum() <= 0)
+				continue;
 
 			log.warning("Por Procesar: " + String.valueOf(total = total - 1));
 			log.warning("Factura a procesar: " + invoice.getDocumentNo());
@@ -65,7 +66,10 @@ public class SRIGenerateAccesCode extends SvrProcess {
 
 		total = invoices.size();
 
-		for (MInvoice invoice : invoices) {
+		for (MInvoice invoice : invoices) {			
+
+			if (invoice.getGrandTotal().signum() <= 0)
+				continue;
 
 			log.warning("Por Procesar: " + String.valueOf(total = total - 1));
 			log.warning("Factura a procesar: " + invoice.getDocumentNo());
