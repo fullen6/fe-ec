@@ -718,9 +718,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		msg = null;
 		LEC_FE_Movement lecfemovement = new LEC_FE_Movement(movement.getCtx(), movement.getM_Movement_ID(),
 				movement.get_TrxName());
-		// Hardcoded 1000418-SIS UIO COMPANIA RELACIONADA
-		// if (shortdoctype.equals("06") && dt.getC_DocType_ID() == 1000418) //
-		// GUÍA DE REMISIÓN
+
 		if (shortdoctype.equals("06"))
 			msg = lecfemovement.lecfeMovement_SriExportMovementXML100();
 		else
@@ -821,9 +819,6 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			msg = "No existe definicion OrgInfo.DocumentCode: " + orginfo.toString();
 		else if (orginfo.get_ValueAsString("SRI_OrgCode").equals(""))
 			msg = "No existe definicion OrgInfo.SRI_OrgCode: " + orginfo.toString();
-		// else if (orginfo.get_ValueAsString("SRI_StoreCode").equals(""))
-		// msg = "No existe definicion OrgInfo.SRI_StoreCode: " +
-		// orginfo.toString();
 		else if (orginfo.get_ValueAsString("SRI_DocumentCode").equals(""))
 			msg = "No existe definicion OrgInfo.SRI_DocumentCode: " + orginfo.toString();
 		else if (orginfo.get_ValueAsString("SRI_IsKeepAccounting").equals(""))
@@ -873,13 +868,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 							+ Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - "
 							+ Msg.getElement(Env.getCtx(), X_LCO_TaxIdType.COLUMNNAME_LCO_TaxIdType_ID);
 				}
-				/*
-				 * if (bp.get_Value(X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID) == null)
-				 * { msg = Msg.translate(Env.getCtx(), "FillMandatory") + " " +
-				 * Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - " +
-				 * Msg.getElement(Env.getCtx(),
-				 * X_LCO_TaxPayerType.COLUMNNAME_LCO_TaxPayerType_ID); }
-				 */
+			
 				if (dt.get_ValueAsString("SRI_ShortDocType").equals("05")
 						|| dt.get_ValueAsString("SRI_ShortDocType").equals("04")) {
 					if (invoice.get_Value("SRI_RefInvoice_ID") == null

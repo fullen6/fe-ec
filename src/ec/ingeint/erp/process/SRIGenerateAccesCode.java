@@ -37,6 +37,7 @@ public class SRIGenerateAccesCode extends SvrProcess {
 		String where = "sri_authorization_id Is Null and issriofflineschema = 'Y' AND IssoTrx='Y' ";
 
 		int total = 0;
+		String seq = "";
 
 		List<MInvoice> invoices = new Query(getCtx(), MInvoice.Table_Name, where, get_TrxName()).list();
 
@@ -83,8 +84,11 @@ public class SRIGenerateAccesCode extends SvrProcess {
 
 			if (dt.get_ValueAsString("SRI_ShortDocType") != null && !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()
 					&& count > 0 ) {
-
-				String seq = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+				
+				if (!invoice.get_ValueAsBoolean("IsGenerated"))
+					seq = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+				else
+					seq = DB.getSQLValueString(invoice.get_TrxName(), "SELECT DocumentNo FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ", invoice.getC_Invoice_ID());
 
 				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
 						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
