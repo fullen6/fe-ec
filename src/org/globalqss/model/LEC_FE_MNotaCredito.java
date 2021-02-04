@@ -532,6 +532,13 @@ public class LEC_FE_MNotaCredito extends MInvoice
 				// Procesar Recepcion SRI
 				log.warning("@Sending Xml@ -> " + file_name);
 				msg = signature.respuestaRecepcionComprobante(file_name);
+				
+				if (msg != null)				
+					if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+						a.set_ValueOfColumn("IsToSend", false);
+						a.saveEx();
+						return null;
+					}
 
 				if (msg != null)
 					if (!msg.equals("RECIBIDA")){
@@ -542,6 +549,8 @@ public class LEC_FE_MNotaCredito extends MInvoice
 				String invoiceID = String.valueOf(get_ID());
 				a.setDescription(invoiceNo);
 				a.set_ValueOfColumn("DocumentID", invoiceID);
+				a.set_ValueOfColumn("IsToSend", false);
+				a.setSRI_AuthorizationCode(a.getValue());
 				a.saveEx();
 				
 
