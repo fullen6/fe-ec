@@ -608,7 +608,6 @@ public class LEC_FE_MNotaCredito extends MInvoice
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
 		
 
-		set_Value("SRI_Authorization_ID", autorizationID);
 		this.saveEx();
 		return msg;
 
