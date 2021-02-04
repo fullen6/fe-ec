@@ -623,7 +623,13 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 				log.warning("@Sending Xml@ -> " + file_name);
 				msg = signature.respuestaRecepcionComprobante(file_name);
 
-				if (msg != null)
+				if (msg != null)				
+					if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+						a.set_ValueOfColumn("IsToSend", false);
+						a.saveEx();
+						return null;
+					}
+			
 					if (!msg.equals("RECIBIDA")) {
 
 						int exist = DB.getSQLValue(null,
@@ -654,6 +660,8 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 				a.setDescription(invoiceNo);
 				a.set_ValueOfColumn("DocumentID", invoiceID);
 				a.set_ValueOfColumn("C_Invoice_ID", get_ID());
+				a.set_ValueOfColumn("IsToSend", false);
+				a.setSRI_AuthorizationCode(a.getValue());
 				a.saveEx();
 				msg = null;
 				file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesEnProceso);

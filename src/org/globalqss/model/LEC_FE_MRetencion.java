@@ -413,11 +413,9 @@ public class LEC_FE_MRetencion extends MInvoice {
 				msg = signature.respuestaRecepcionComprobante(file_name);
 
 				if (msg != null)
-
 					if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
 						a.set_ValueOfColumn("IsToSend", false);
 						a.saveEx();
-
 					}
 
 				if (msg.contains("ERROR-65"))
