@@ -81,7 +81,10 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 	public String lecfeinv_SriExportInvoicePLXML100() {
 
 		String msg = null;
-		X_SRI_Authorization a = null;
+		MInvoice invoice = new MInvoice(getCtx(), get_ID(), get_TrxName());
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), invoice.get_ValueAsInt("SRI_Authorization_ID"),
+				get_TrxName());
+		
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 
 		try {
@@ -161,49 +164,6 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			if (m_withholdingamt == null)
 				m_withholdingamt = Env.ZERO;
 
-			//
-			int sri_accesscode_id = 0;
-
-			// New/Upd Access Code
-
-			X_SRI_AccessCode ac = null;
-			ac = new X_SRI_AccessCode(getCtx(), sri_accesscode_id, get_TrxName());
-			ac.setAD_Org_ID(getAD_Org_ID());
-			ac.setOldValue(null); // Deprecated
-			ac.setEnvType(signature.getEnvType());
-			ac.setCodeAccessType(signature.getCodeAccessType());
-			ac.setSRI_ShortDocType(m_coddoc);
-			ac.setIsUsed(true);
-			ac.saveEx();
-
-			 // Access Code
-            m_accesscode = LEC_FE_Utils.getAccessCode(getDateInvoiced(), m_coddoc, bpe.getTaxID(),
-                    //oi.get_ValueAsString("SRI_OrgCode"), 
-                    LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-                    LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(getDocumentNo(), m_coddoc)), 
-                    getDocumentNo(),
-                    oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
-
-			if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
-				ac.setValue(m_accesscode);
-
-			if (!ac.save()) {
-				msg = "@SaveError@ No se pudo grabar SRI Access Code";
-				return "Error en Liquidación No " + getDocumentNo() + " " + msg;
-			}
-
-			// New Authorization
-
-			a = new X_SRI_Authorization(getCtx(), 0, get_TrxName());
-
-			a.setAD_Org_ID(getAD_Org_ID());
-			a.setSRI_ShortDocType(m_coddoc);
-			a.setValue(m_accesscode);
-			a.setSRI_AccessCode_ID(ac.get_ID());
-			a.setSRI_ErrorCode_ID(0);
-			a.setAD_UserMail_ID(getAD_User_ID());
-			a.set_ValueOfColumn("isSRIOfflineSchema", isOfflineSchema);
-			a.set_ValueOfColumn("C_Invoice_ID", get_ID());
 
 			OutputStream mmDocStream = null;
 
@@ -371,7 +331,6 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 
 			MInvoicePaySchedule[] ipss = MInvoicePaySchedule.getInvoicePaySchedule(getCtx(), get_ID(), 0,
 					get_TrxName());
-			MInvoice invoice = new MInvoice(getCtx(), get_ID(), get_TrxName());
 
 			int rows = ipss.length;
 
