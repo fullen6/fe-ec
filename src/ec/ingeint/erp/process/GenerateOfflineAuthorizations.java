@@ -62,10 +62,11 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 	/** Number of authorizations */
 	private int m_created = 0;
 
-	String[] m_tables = {"C_Invoice", "M_InOut", "M_Movement"};
+	String[] m_tables = { "C_Invoice", "M_InOut", "M_Movement" };
 	Timestamp DateAcct = null;
 	Timestamp DateAcctTo = null;
-	
+	String[] TableName = null;
+
 	private static CLogger log = CLogger.getCLogger(LEC_FE_ModelValidator.class);
 
 	/**
@@ -79,9 +80,10 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 			if (name.equals(MInvoice.COLUMNNAME_DateAcct)) {
 				DateAcct = para[i].getParameterAsTimestamp();
 				DateAcctTo = para[i].getParameter_ToAsTimestamp();
-			} else if (para[i].getParameter() == null)
-				;
-			else
+			}
+			else if (name.equals("TableName")) {
+				TableName = (String[]) para[i].getParameter();
+			} else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
 
@@ -95,9 +97,12 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 	 */
 	@Override
 	protected String doIt() throws Exception {
-		
+
 		String msg = "";
 		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
+		
+		if (TableName != null)
+			m_tables = TableName;
 
 		for (String table : m_tables) {
 			log.info("Processing " + table);

@@ -261,7 +261,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 			// Texto2
 			addHeaderElement(mmDoc, "obligadoContabilidad", m_obligadocontabilidad, atts);
 			// Alfanumerico Max 40
-			addHeaderElement(mmDoc, "rise", LEC_FE_Utils.cutString(tp.getName(), 40), atts);
+			//addHeaderElement(mmDoc, "rise", LEC_FE_Utils.cutString(tp.getName(), 40), atts);
 			// Numerico2
 			if (m_coddoc.equals("04"))
 				addHeaderElement(mmDoc, "codDocModificado", "01", atts);	// Hardcoded
