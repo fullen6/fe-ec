@@ -363,8 +363,8 @@ public class LEC_FE_MRetencion extends MInvoice {
 				rs.close();
 				pstmt.close();
 			} catch (SQLException e) {
-				DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
-						get_TrxName());
+				//DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
+				//		get_TrxName());
 				log.log(Level.SEVERE, sql.toString(), e);
 				msg = "Error SQL: " + sql.toString();
 				return ErrorDocumentno + msg;
@@ -433,8 +433,8 @@ public class LEC_FE_MRetencion extends MInvoice {
 				if (!msg.equals("RECIBIDA")) {
 					String DocumentNo = DB.getSQLValueString(get_TrxName(),
 							"SELECT Description FROM AD_Note WHERE Description = ?", getDocumentNo());
-					DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
-							get_TrxName());
+					//DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(), true,
+					//		get_TrxName());
 					if (DocumentNo == null) {
 						MNote note = new MNote(getCtx(), 0, null);
 						note.setAD_Table_ID(318);

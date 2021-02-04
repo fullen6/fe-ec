@@ -65,6 +65,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 	String[] m_tables = { "C_Invoice", "M_InOut" };
 	Timestamp DateAcct = null;
 	Timestamp DateAcctTo = null;
+	
 	private static CLogger log = CLogger.getCLogger(LEC_FE_ModelValidator.class);
 
 	/**
