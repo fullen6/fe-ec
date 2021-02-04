@@ -301,8 +301,8 @@ public class LEC_FE_MRetencion extends MInvoice {
 				while (rs.next()) {
 					if (rs.getString(5).equals("0") || rs.getString(6).equals("X")) {
 						msg = "Impuesto sin Tipo ó Porcentaje impuesto SRI";
-						DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(),
-								true, get_TrxName());
+						//DB.executeUpdate("DELETE FROM SRI_Authorization WHERE SRI_Authorization_ID = " + a.get_ID(),
+						//		true, get_TrxName());
 						return ErrorDocumentno + msg;
 					}
 
