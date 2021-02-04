@@ -56,7 +56,6 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 	private String m_tipoidentificacioncomprador = "";
 	private String m_identificacioncomprador = "";
 	private String m_razonsocial = "";
-	private boolean IsGenerateInBatch = false;
 
 	private BigDecimal m_totaldescuento = Env.ZERO;
 	private BigDecimal m_totalbaseimponible = Env.ZERO;
@@ -617,9 +616,8 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 
 			file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesFirmados);
 
-			if (dt.get_Value("IsGenerateInBatch") != null)
-				IsGenerateInBatch = dt.get_ValueAsBoolean("IsGenerateInBatch");
-			if (!signature.IsUseContingency && !IsGenerateInBatch) {
+			
+			if (!signature.IsUseContingency ) {
 
 				// Procesar Recepcion SRI
 				log.warning("@Sending Xml@ -> " + file_name);
@@ -663,11 +661,9 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			} else { // emisionContingencia
 				// Completar en estos casos, luego usar Boton Procesar
 				// 170-Clave de contingencia pendiente
-				if (signature.IsUseContingency)
-					a.setSRI_ErrorCode_ID(LEC_FE_Utils.getErrorCode("170"));
+
 				// 70-Clave de acceso en procesamiento
-				if (IsGenerateInBatch)
-					a.setSRI_ErrorCode_ID(LEC_FE_Utils.getErrorCode("70"));
+				
 				a.saveEx();
 
 				if (signature.isAttachXml())
