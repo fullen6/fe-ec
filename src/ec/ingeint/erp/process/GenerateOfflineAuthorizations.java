@@ -110,7 +110,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus IN  ('CO', 'CL') "
 					+ " AND a.issri_error = 'N' AND dt.sri_shortdoctype notnull AND au.IsToSend = 'Y' ";
 
-			if (DateAcct != null)
+			if (DateAcct != null && !table.equals("M_Movement"))
 				sql = sql + " AND a.DateAcct between ? AND ? ";
 
 			PreparedStatement pstmt = null;
@@ -118,7 +118,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				int index = 1;
 				pstmt.setInt(index++, getAD_Client_ID());
-				if (DateAcct != null) {
+				if (DateAcct != null && !table.equals("M_Movement")) {
 					pstmt.setTimestamp(index++, DateAcct);
 					pstmt.setTimestamp(index++, DateAcctTo);
 				}
