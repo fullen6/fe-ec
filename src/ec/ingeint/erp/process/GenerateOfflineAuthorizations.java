@@ -62,7 +62,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 	/** Number of authorizations */
 	private int m_created = 0;
 
-	String[] m_tables = { "C_Invoice", "M_InOut" };
+	String[] m_tables = {"C_Invoice", "M_InOut", "M_Movement"};
 	Timestamp DateAcct = null;
 	Timestamp DateAcctTo = null;
 	
@@ -96,11 +96,6 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception {
 		
-		if (DateAcct == null) {
-			DateAcct = Timestamp.valueOf("2021-01-01 00:00:00");
-			DateAcctTo = Timestamp.valueOf("2021-01-15 00:00:00");
-		}
-
 		String msg = "";
 		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 
@@ -112,7 +107,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 			sql = "SELECT * " + "FROM " + table + " a " + "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
 					+ "JOIN SRI_Authorization au on au.SRI_Authorization_ID = a.SRI_Authorization_ID "
 					+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
-					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus = 'CO' "
+					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus IN  ('CO', 'CL') "
 					+ " AND a.issri_error = 'N' AND dt.sri_shortdoctype notnull AND au.IsToSend = 'Y' ";
 
 			if (DateAcct != null)
