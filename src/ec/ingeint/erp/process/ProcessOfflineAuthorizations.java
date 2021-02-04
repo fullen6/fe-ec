@@ -54,7 +54,7 @@ import org.globalqss.util.LEC_FE_UtilsXml;
  * 
  * @author INGEINT/ocurieles
  */
-public class SRIProcessOfflineAuthorizations extends SvrProcess {
+public class ProcessOfflineAuthorizations extends SvrProcess {
 
 	/** Client */
 	private int m_AD_Client_ID = 0;

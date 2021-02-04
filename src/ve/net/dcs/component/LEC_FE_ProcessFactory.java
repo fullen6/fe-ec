@@ -15,8 +15,8 @@ import org.globalqss.process.SRIReprocessAuthorization;
 import ec.ingeint.erp.process.LEC_InvoiceGenerate;
 import ec.ingeint.erp.process.SRIGeneateOffLineAutForDocument;
 import ec.ingeint.erp.process.SRIGenerateAccesCode;
-import ec.ingeint.erp.process.SRIGenerateOfflineAuthorizations;
-import ec.ingeint.erp.process.SRIProcessOfflineAuthorizations;
+import ec.ingeint.erp.process.GenerateOfflineAuthorizations;
+import ec.ingeint.erp.process.ProcessOfflineAuthorizations;
 
 public class LEC_FE_ProcessFactory implements IProcessFactory {
 
@@ -73,14 +73,14 @@ public class LEC_FE_ProcessFactory implements IProcessFactory {
 				process = LEC_InvoiceGenerate.class.getConstructor().newInstance();
 			} catch (Exception e) {
 			}
-		} else if (SRIGenerateOfflineAuthorizations.class.getCanonicalName().equals(className)) {
+		} else if (GenerateOfflineAuthorizations.class.getCanonicalName().equals(className)) {
 			try {
-				process = SRIGenerateOfflineAuthorizations.class.getConstructor().newInstance();
+				process = GenerateOfflineAuthorizations.class.getConstructor().newInstance();
 			} catch (Exception e) {
 			}
-		} else if (SRIProcessOfflineAuthorizations.class.getCanonicalName().equals(className)) {
+		} else if (ProcessOfflineAuthorizations.class.getCanonicalName().equals(className)) {
 			try {
-				process = SRIProcessOfflineAuthorizations.class.getConstructor().newInstance();
+				process = ProcessOfflineAuthorizations.class.getConstructor().newInstance();
 			} catch (Exception e) {
 			}
 		} else if (SRIGeneateOffLineAutForDocument.class.getCanonicalName().equals(className)) {

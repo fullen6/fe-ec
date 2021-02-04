@@ -28,6 +28,7 @@ package ec.ingeint.erp.process;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
@@ -56,13 +57,14 @@ import ec.ingeint.erp.model.LEC_FE_MInvoicePL;
  * 
  * @author GlobalQSS/jjgq
  */
-public class SRIGenerateOfflineAuthorizations extends SvrProcess {
+public class GenerateOfflineAuthorizations extends SvrProcess {
 
 	/** Number of authorizations */
 	private int m_created = 0;
 
-	String[] m_tables = { "M_Movement", "C_Invoice", "M_InOut" };
-
+	String[] m_tables = { "C_Invoice", "M_InOut" };
+	Timestamp DateAcct = null;
+	Timestamp DateAcctTo = null;
 	private static CLogger log = CLogger.getCLogger(LEC_FE_ModelValidator.class);
 
 	/**
@@ -73,7 +75,10 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 		ProcessInfoParameter[] para = getParameter();
 		for (int i = 0; i < para.length; i++) {
 			String name = para[i].getParameterName();
-			if (para[i].getParameter() == null)
+			if (name.equals(MInvoice.COLUMNNAME_DateAcct)) {
+				DateAcct = para[i].getParameterAsTimestamp();
+				DateAcctTo = para[i].getParameter_ToAsTimestamp();
+			} else if (para[i].getParameter() == null)
 				;
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
@@ -89,6 +94,11 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 	 */
 	@Override
 	protected String doIt() throws Exception {
+		
+		if (DateAcct == null) {
+			DateAcct = Timestamp.valueOf("2021-01-01 00:00:00");
+			DateAcctTo = Timestamp.valueOf("2021-01-15 00:00:00");
+		}
 
 		String msg = "";
 		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
@@ -104,11 +114,18 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus = 'CO' "
 					+ " AND a.issri_error = 'N' AND dt.sri_shortdoctype notnull AND au.IsToSend = 'Y' ";
 
+			if (DateAcct != null)
+				sql = sql + " AND a.DateAcct between ? AND ? ";
+
 			PreparedStatement pstmt = null;
 			try {
 				pstmt = DB.prepareStatement(sql, get_TrxName());
 				int index = 1;
 				pstmt.setInt(index++, getAD_Client_ID());
+				if (DateAcct != null) {
+					pstmt.setTimestamp(index++, DateAcct);
+					pstmt.setTimestamp(index++, DateAcctTo);
+				}
 
 			} catch (Exception e) {
 				log.log(Level.SEVERE, sql, e);
@@ -216,7 +233,7 @@ public class SRIGenerateOfflineAuthorizations extends SvrProcess {
 			if (lecfeinvret.get_ValueAsInt("SRI_Authorization_ID") < 1
 					&& new BigDecimal(lecfeinvret.get_ValueAsString("WithholdingAmt")).signum() > 0) {
 				LEC_FE_MRetencion.generateWitholdingNo(inv);
-				
+
 			}
 			msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
 		} else

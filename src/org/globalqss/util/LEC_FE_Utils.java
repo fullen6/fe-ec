@@ -732,9 +732,9 @@ public class LEC_FE_Utils {
 
 	public static String ReplaceSpecialChar(String word) {
 		String[] badChars = { "ñ", "|", "à", "á", "À", "Á", "è", "é", "È", "É", "ì", "í", "Ì", "Í", "ò", "ó", "Ò", "Ó",
-				"ù", "ú", "Ù", "Ú", "\b", "/", ":", "<", "*", "?", ">" };
+				"ù", "ú", "Ù", "Ú", "\b", "/", ":", "<", "*", "?", ">", "-", "," };
 		String[] goodChars = { "n", "_", "a", "a", "A", "A", "e", "e", "E", "E", "i", "i", "I", "I", "o", "o", "O", "O",
-				"u", "u", "U", "U", "_", "", "", "", "", "", "" };
+				"u", "u", "U", "U", "_", "", "", "", "", "", "", " ", " " };
 
 		for (String bwords : badChars) {
 			if (word.contains(bwords)) {
