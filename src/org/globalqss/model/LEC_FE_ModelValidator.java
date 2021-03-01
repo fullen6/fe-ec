@@ -350,7 +350,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 				// on
 				// factura_v1.1.0.xsd
 				// SRI
-				validateDigitAllowed(invoiceLine.getLineNetAmt().doubleValue(), 2, MInvoiceLine.COLUMNNAME_LineNetAmt);// Max
+				validateDigitAllowed(invoiceLine.getLineNetAmt().doubleValue(), 3, MInvoiceLine.COLUMNNAME_LineNetAmt);// Max
 																														// 2
 																														// digit
 																														// on
@@ -382,7 +382,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 						// digit on
 						// factura_v1.1.0.xsd
 						if (order.isSOTrx())
-							validateDigitAllowed(orderLine.getLineNetAmt().doubleValue(), 2,
+							validateDigitAllowed(orderLine.getLineNetAmt().doubleValue(), 3,
 									MOrderLine.COLUMNNAME_LineNetAmt);// Max 2 digit
 						// on
 						// factura_v1.1.0.xsd

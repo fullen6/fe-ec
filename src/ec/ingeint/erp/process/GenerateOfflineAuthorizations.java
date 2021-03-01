@@ -82,7 +82,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 				DateAcctTo = para[i].getParameter_ToAsTimestamp();
 			}
 			else if (name.equals("TableName")) {
-				TableName = (String[]) para[i].getParameter();
+				TableName = new String[] {para[i].getParameterAsString()};
 			} else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}

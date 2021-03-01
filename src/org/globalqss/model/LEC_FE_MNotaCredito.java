@@ -26,7 +26,6 @@ import org.compiere.model.MSysConfig;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
-import org.compiere.util.Trx;
 import org.globalqss.util.LEC_FE_Utils;
 import org.globalqss.util.LEC_FE_UtilsXml;
 import org.xml.sax.helpers.AttributesImpl;
@@ -151,7 +150,7 @@ public class LEC_FE_MNotaCredito extends MInvoice
 			if (tt.getLCO_TaxIdType_ID() == 1000011)	// Hardcoded F Final	// TODO Deprecated
 				m_identificacioncomprador = m_identificacionconsumidor;
 
-			X_LCO_TaxPayerType tp = new X_LCO_TaxPayerType(getCtx(), bp.get_ValueAsInt("LCO_TaxPayerType_ID"), get_TrxName());		
+			//X_LCO_TaxPayerType tp = new X_LCO_TaxPayerType(getCtx(), bp.get_ValueAsInt("LCO_TaxPayerType_ID"), get_TrxName());		
 
 			if (get_Value("SRI_RefInvoice_ID") == null && get_Value("InvoiceDocumentReference") == null)
 				return ErrorDocumentno+"No existe documento sustento para el comprobante";
