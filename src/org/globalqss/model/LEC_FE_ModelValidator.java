@@ -172,6 +172,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 					if (count > 0) {
 
 						String withholding_no = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+						
 						X_SRI_Authorization wh_auth = new X_SRI_Authorization(invoice.getCtx(), 0,
 								invoice.get_TrxName());
 
@@ -190,7 +191,6 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 							invoice.get_TrxName());
 
 					invoice.set_ValueOfColumn("SRI_AuthorizationPL_ID", auth.getSRI_Authorization_ID());
-
 					invoice.saveEx();
 
 				} else {

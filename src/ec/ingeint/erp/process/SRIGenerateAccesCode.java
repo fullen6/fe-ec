@@ -50,10 +50,13 @@ public class SRIGenerateAccesCode extends SvrProcess {
 
 			log.warning("Por Procesar: " + String.valueOf(total = total - 1));
 			log.warning("Factura a procesar: " + invoice.getDocumentNo());
+			MDocType dt = new MDocType(getCtx(), invoice.getC_DocTypeTarget_ID(), get_TrxName());
+			String DocTypeSri = dt.get_ValueAsString("SRI_ShortDocType");
+			
 
 			X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
 					MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
-					invoice.getC_Invoice_ID(), invoice.getC_DocTypeTarget_ID(), invoice.getDateAcct(),
+					invoice.getC_Invoice_ID(), DocTypeSri, invoice.getDateAcct(),
 					invoice.getDocumentNo(), get_TrxName());
 
 			invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
@@ -92,7 +95,7 @@ public class SRIGenerateAccesCode extends SvrProcess {
 
 				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
 						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
-						invoice.getC_Invoice_ID(), invoice.getC_DocTypeTarget_ID(), invoice.getDateAcct(), seq,
+						invoice.getC_Invoice_ID(), dt.get_ValueAsString("SRI_ShortDocType"), invoice.getDateAcct(), seq,
 						get_TrxName());
 
 				invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
