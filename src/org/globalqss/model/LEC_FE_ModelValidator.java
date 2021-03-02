@@ -154,38 +154,69 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
 			X_SRI_Authorization auth = new X_SRI_Authorization(invoice.getCtx(), 0, invoice.get_TrxName());
 
-			if (dt.get_ValueAsString("SRI_ShortDocType") != null
-					&& !dt.get_ValueAsString("SRI_ShortDocType").isEmpty() && invoice.getGrandTotal().signum() > 0 ) {
+			if (dt.get_ValueAsString("SRI_ShortDocType") != null && !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()
+					&& invoice.getGrandTotal().signum() > 0) {
+
+				int count = DB.getSQLValue(invoice.get_TrxName(),
+						"SELECT COUNT(*) " + 
+								"FROM LCO_InvoiceWithholding iw " +
+								"JOIN C_Invoice i on i.C_Invoice_ID = iw.C_Invoice_ID "
+								+ "WHERE iw.C_Invoice_ID = ? AND i.IssoTrx = 'N' ",
+						invoice.getC_Invoice_ID());
 
 				String documentno = invoice.getDocumentNo();
-
 				Boolean CreateAccesCode = true;
 
-				if (dt.get_ValueAsString("SRI_ShortDocType").equals("07") && !invoice.isSOTrx()) {
+				if (dt.get_ValueAsString("SRI_ShortDocType").equals("03")) {
 
-					int count = DB.getSQLValue(invoice.get_TrxName(),
-							"SELECT COUNT(*) " + "FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ",
-							invoice.getC_Invoice_ID());
+					if (count > 0) {
 
-					if (count <= 0) {
-						CreateAccesCode = false;
-					} else {
-						documentno = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+						String withholding_no = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+						X_SRI_Authorization wh_auth = new X_SRI_Authorization(invoice.getCtx(), 0,
+								invoice.get_TrxName());
+
+						wh_auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(),
+								MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
+								invoice.getC_Invoice_ID(), "07", invoice.getDateInvoiced(), withholding_no,
+								invoice.get_TrxName());
+
+						invoice.set_ValueOfColumn("SRI_Authorization_ID", wh_auth);
+
 					}
-				}
-
-				if (CreateAccesCode) {
 
 					auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(), MInvoice.COLUMNNAME_C_Invoice_ID,
 							invoice.getAD_Org_ID(), invoice.getAD_User_ID(), invoice.getC_Invoice_ID(),
-							invoice.getC_DocTypeTarget_ID(), invoice.getDateInvoiced(), documentno,
+							dt.get_ValueAsString("SRI_ShortDocType"), invoice.getDateInvoiced(), documentno,
 							invoice.get_TrxName());
 
-					invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+					invoice.set_ValueOfColumn("SRI_AuthorizationPL_ID", auth.getSRI_Authorization_ID());
+
 					invoice.saveEx();
 
-				}
+				} else {
 
+					if (dt.get_ValueAsString("SRI_ShortDocType").equals("07") && !invoice.isSOTrx()) {
+
+						if (count <= 0) {
+							CreateAccesCode = false;
+						} else {
+							documentno = LEC_FE_MRetencion.generateWitholdingNo(invoice);
+						}
+					}
+
+					if (CreateAccesCode) {
+
+						auth = LEC_FE_CreateAccessCode.CreateAccessCode(invoice.getCtx(),
+								MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
+								invoice.getC_Invoice_ID(), dt.get_ValueAsString("SRI_ShortDocType"),
+								invoice.getDateInvoiced(), documentno, invoice.get_TrxName());
+
+						invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+						invoice.saveEx();
+
+					}
+
+				}
 			}
 
 		}
@@ -421,7 +452,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 			X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(movement.getCtx(),
 					MMovement.COLUMNNAME_M_Movement_ID, movement.getAD_Org_ID(), movement.getAD_User_ID(),
-					movement.getM_Movement_ID(), movement.getC_DocType_ID(), movement.getMovementDate(),
+					movement.getM_Movement_ID(), dt.get_ValueAsString("SRI_ShortDocType"), movement.getMovementDate(),
 					movement.getDocumentNo(), movement.get_TrxName());
 
 			if (movement.get_Value("SRI_Authorization_ID") != null)
@@ -868,7 +899,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 							+ Msg.getElement(Env.getCtx(), MBPartner.COLUMNNAME_C_BPartner_ID) + " - "
 							+ Msg.getElement(Env.getCtx(), X_LCO_TaxIdType.COLUMNNAME_LCO_TaxIdType_ID);
 				}
-			
+
 				if (dt.get_ValueAsString("SRI_ShortDocType").equals("05")
 						|| dt.get_ValueAsString("SRI_ShortDocType").equals("04")) {
 					if (invoice.get_Value("SRI_RefInvoice_ID") == null
@@ -952,8 +983,8 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(inout.getCtx(),
 						MInOut.COLUMNNAME_M_InOut_ID, inout.getAD_Org_ID(), inout.getAD_User_ID(),
-						inout.getM_InOut_ID(), inout.getC_DocType_ID(), inout.getMovementDate(), inout.getDocumentNo(),
-						inout.get_TrxName());
+						inout.getM_InOut_ID(), doctype.get_ValueAsString("SRI_ShortDocType"), inout.getMovementDate(),
+						inout.getDocumentNo(), inout.get_TrxName());
 
 				inout.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
 				inout.saveEx();

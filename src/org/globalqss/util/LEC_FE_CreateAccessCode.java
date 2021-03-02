@@ -29,11 +29,10 @@ public class LEC_FE_CreateAccessCode {
 	 * @return
 	 */
 	public static X_SRI_Authorization CreateAccessCode(Properties ctx, String Column_ID, int AD_Org_ID, int AD_User_ID,
-			int ID, int C_DocType, Timestamp DateDoc, String DocumentNo, String trxName) {
+			int ID, String codeDoc, Timestamp DateDoc, String DocumentNo, String trxName) {
 
 		MOrgInfo oi = MOrgInfo.get(ctx, AD_Org_ID, trxName);
-		MDocType dt = MDocType.get(ctx, C_DocType);
-		String m_coddoc = dt.get_ValueAsString("SRI_ShortDocType");
+		String m_coddoc = codeDoc;
 		
 		if (m_coddoc.isEmpty())
 			return null;
