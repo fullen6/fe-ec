@@ -101,7 +101,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 		String msg = "";
 		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 		
-		if (TableName != null)
+		if (TableName[0] != null)
 			m_tables = TableName;
 
 		for (String table : m_tables) {
