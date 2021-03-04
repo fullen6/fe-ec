@@ -181,7 +181,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 								invoice.getC_Invoice_ID(), "07", invoice.getDateInvoiced(), withholding_no,
 								invoice.get_TrxName());
 
-						invoice.set_ValueOfColumn("SRI_Authorization_ID", wh_auth);
+						invoice.set_ValueOfColumn("SRI_Authorization_ID", wh_auth.getSRI_Authorization_ID());
 
 					}
 

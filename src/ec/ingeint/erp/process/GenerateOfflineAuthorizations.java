@@ -82,7 +82,8 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 				DateAcctTo = para[i].getParameter_ToAsTimestamp();
 			}
 			else if (name.equals("TableName")) {
-				TableName = new String[] {para[i].getParameterAsString()};
+				if (para[i].getParameterAsString() != null)
+					TableName = new String[] {para[i].getParameterAsString()};
 			} else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -101,7 +102,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 		String msg = "";
 		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
 		
-		if (TableName[0] != null)
+		if (TableName != null)
 			m_tables = TableName;
 
 		for (String table : m_tables) {
