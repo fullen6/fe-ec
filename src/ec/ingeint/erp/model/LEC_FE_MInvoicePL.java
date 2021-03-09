@@ -690,21 +690,6 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			return "Error en Factura No " + getDocumentNo() + " " + msg;
 		}
 
-		set_Value("SRI_AuthorizationPL_ID", a.get_ID());
-
-		MDocType dt = new MDocType(getCtx(), getC_DocType_ID(), get_TrxName());
-
-		if (!dt.get_Value("GenerateWithholding").equals("N")) {
-
-			LEC_FE_MRetencion lecfeinvret = new LEC_FE_MRetencion(getCtx(), getC_Invoice_ID(), get_TrxName());
-			if (lecfeinvret.get_ValueAsInt("SRI_Authorization_ID") < 1 && MSysConfig
-					.getBooleanValue("LEC_GenerateWitholdingToComplete", false, lecfeinvret.getAD_Client_ID())) {
-				LEC_FE_MRetencion.generateWitholdingNo(lecfeinvret);
-				msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
-			}
-		} else
-			set_Value("SRI_Authorization_ID", a.get_ID());
-
 		this.saveEx();
 		return msg;
 
