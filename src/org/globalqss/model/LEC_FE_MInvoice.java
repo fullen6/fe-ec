@@ -79,7 +79,6 @@ public class LEC_FE_MInvoice extends MInvoice {
 		// 04/07/2016 MHG Offline Schema added
 		isOfflineSchema = MSysConfig.getBooleanValue("QSSLEC_FE_OfflineSchema", false,
 				Env.getAD_Client_ID(Env.getCtx()));
-
 	}
 
 	public String lecfeinv_SriExportInvoiceXML100() {

@@ -81,7 +81,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 
 		String msg = null;
 		MInvoice invoice = new MInvoice(getCtx(), get_ID(), get_TrxName());
-		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), invoice.get_ValueAsInt("SRI_Authorization_ID"),
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), invoice.get_ValueAsInt("SRI_AuthorizationPL_ID"),
 				get_TrxName());
 		
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
