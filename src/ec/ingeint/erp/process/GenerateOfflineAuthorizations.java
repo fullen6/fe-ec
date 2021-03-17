@@ -110,7 +110,9 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 			//
 			String sql = null;
 
-			sql = "SELECT * " + "FROM " + table + " a " + "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
+			sql = "SELECT * " 
+			        + "FROM " + table + " a " 
+			        + "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
 					+ "JOIN SRI_Authorization au on au.SRI_Authorization_ID = a.SRI_Authorization_ID "
 					+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
 					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus IN  ('CO', 'CL') "

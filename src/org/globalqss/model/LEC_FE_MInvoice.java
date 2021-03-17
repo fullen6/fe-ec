@@ -385,7 +385,7 @@ public class LEC_FE_MInvoice extends MInvoice {
 					: getC_BPartner_Location().getC_Location().getRegionName());
 			addr.append(getC_BPartner_Location().getC_Location().getC_Country().getName() == null ? ""
 					: "," + getC_BPartner_Location().getC_Location().getC_Country().getName());
-			String valaddr = addr.toString();
+			String valaddr = addr.toString().trim().replace("\n", "");
 
 			addHeaderElement(mmDoc, "direccionComprador", LEC_FE_Utils.cutString(LEC_FE_Utils.ReplaceSpecialChar(valaddr.toString()), 300), atts);
 
