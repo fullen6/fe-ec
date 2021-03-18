@@ -10,6 +10,7 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.globalqss.model.LEC_FE_MRetencion;
+import org.globalqss.model.MLCOInvoiceWithholding;
 import org.globalqss.model.X_SRI_Authorization;
 import org.globalqss.util.LEC_FE_CreateAccessCode;
 
@@ -44,7 +45,7 @@ public class SRIGenerateAccesCode extends SvrProcess {
 		total = invoices.size();
 
 		for (MInvoice invoice : invoices) {
-			
+
 			if (invoice.getGrandTotal().signum() <= 0)
 				continue;
 
@@ -52,16 +53,14 @@ public class SRIGenerateAccesCode extends SvrProcess {
 			log.warning("Factura a procesar: " + invoice.getDocumentNo());
 			MDocType dt = new MDocType(getCtx(), invoice.getC_DocTypeTarget_ID(), get_TrxName());
 			String DocTypeSri = dt.get_ValueAsString("SRI_ShortDocType");
-			
 
 			X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
 					MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
-					invoice.getC_Invoice_ID(), DocTypeSri, invoice.getDateAcct(),
-					invoice.getDocumentNo(), get_TrxName());
+					invoice.getC_Invoice_ID(), DocTypeSri, invoice.getDateAcct(), invoice.getDocumentNo(),
+					get_TrxName());
 
 			invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
 			invoice.saveEx();
-
 		}
 
 		where = "sri_authorization_id Is Null and issriofflineschema = 'Y' AND IssoTrx= 'N' ";
@@ -70,35 +69,48 @@ public class SRIGenerateAccesCode extends SvrProcess {
 
 		total = invoices.size();
 
-		for (MInvoice invoice : invoices) {			
+		for (MInvoice invoice : invoices) {
 
 			if (invoice.getGrandTotal().signum() <= 0)
 				continue;
+			
+			if (invoice.getC_Invoice_ID() == 1018048)
+				log.warning("AQUI");
 
 			log.warning("Por Procesar: " + String.valueOf(total = total - 1));
 			log.warning("Factura a procesar: " + invoice.getDocumentNo());
 
 			MDocType dt = MDocType.get(invoice.getCtx(), invoice.getC_DocTypeTarget_ID());
-			
+			String DocTypeSri = dt.get_ValueAsString("SRI_ShortDocType");
+
 			int count = DB.getSQLValue(invoice.get_TrxName(),
 					"SELECT COUNT(*) " + "FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ",
 					invoice.getC_Invoice_ID());
 
+			if (DocTypeSri != null && !DocTypeSri.isEmpty() && count > 0) {
 
-			if (dt.get_ValueAsString("SRI_ShortDocType") != null && !dt.get_ValueAsString("SRI_ShortDocType").isEmpty()
-					&& count > 0 ) {
-				
 				if (!invoice.get_ValueAsBoolean("IsGenerated"))
 					seq = LEC_FE_MRetencion.generateWitholdingNo(invoice);
 				else
-					seq = DB.getSQLValueString(invoice.get_TrxName(), "SELECT DocumentNo FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ", invoice.getC_Invoice_ID());
+					seq = DB.getSQLValueString(invoice.get_TrxName(),
+							"SELECT DocumentNo FROM LCO_InvoiceWithholding WHERE C_Invoice_ID = ? ",
+							invoice.getC_Invoice_ID());
 
 				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
 						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
-						invoice.getC_Invoice_ID(), dt.get_ValueAsString("SRI_ShortDocType"), invoice.getDateAcct(), seq,
-						get_TrxName());
+						invoice.getC_Invoice_ID(), "07", invoice.getDateAcct(), seq, get_TrxName());
 
 				invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+				invoice.saveEx();
+
+			} if (DocTypeSri.equals("03")) {
+
+				X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
+						MInvoice.COLUMNNAME_C_Invoice_ID, invoice.getAD_Org_ID(), invoice.getAD_User_ID(),
+						invoice.getC_Invoice_ID(), DocTypeSri, invoice.getDateAcct(), invoice.getDocumentNo(),
+						get_TrxName());
+
+				invoice.set_ValueOfColumn("SRI_AuthorizationPL_ID", auth.getSRI_Authorization_ID());
 				invoice.saveEx();
 
 			}
