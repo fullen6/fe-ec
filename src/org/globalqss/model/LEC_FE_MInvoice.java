@@ -955,6 +955,10 @@ public class LEC_FE_MInvoice extends MInvoice {
 				}
 
 			if (!msg.equals("RECIBIDA")) {
+				
+				a.set_ValueOfColumn("issri_error", true);
+				a.set_ValueOfColumn("IsToSend", false);
+				a.saveEx();
 
 				int exist = DB.getSQLValue(null,
 						"SELECT Record_id FROM AD_Note WHERE AD_Table_ID = 318 AND Record_ID=? ", get_ID());

@@ -83,7 +83,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 		MInvoice invoice = new MInvoice(getCtx(), get_ID(), get_TrxName());
 		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), invoice.get_ValueAsInt("SRI_AuthorizationPL_ID"),
 				get_TrxName());
-		
+
 		LEC_FE_UtilsXml signature = new LEC_FE_UtilsXml();
 
 		try {
@@ -135,7 +135,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 
 			MLocation lm = new MLocation(getCtx(), c_location_matriz_id, get_TrxName());
 
-			// Prestador del Servicio
+			// Prestador del Serviciovalue
 			MBPartner bp = new MBPartner(getCtx(), getC_BPartner_ID(), get_TrxName());
 
 			m_razonsocial = bp.getName();
@@ -157,12 +157,11 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 					getC_Invoice_ID());
 
 			if (m_totaldescuento == null)
-				m_totaldescuento = Env.ZERO;			
-			
+				m_totaldescuento = Env.ZERO;
+
 			m_withholdingamt = (new BigDecimal(get_ValueAsString("WithholdingAmt")));
 			if (m_withholdingamt == null)
 				m_withholdingamt = Env.ZERO;
-
 
 			OutputStream mmDocStream = null;
 
@@ -616,45 +615,45 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 
 			file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesFirmados);
 
-			
-			if (!signature.IsUseContingency ) {
+			if (!signature.IsUseContingency) {
 
 				// Procesar Recepcion SRI
 				log.warning("@Sending Xml@ -> " + file_name);
 				msg = signature.respuestaRecepcionComprobante(file_name);
 
-				if (msg != null)				
-					if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+				if (msg != null)
+					if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 						a.set_ValueOfColumn("IsToSend", false);
-						a.saveEx();
-						return null;
+						a.save();
+						this.saveEx();
+						return msg;
 					}
-			
-					if (!msg.equals("RECIBIDA")) {
 
-						int exist = DB.getSQLValue(null,
-								"SELECT Record_id FROM AD_Note WHERE AD_Table_ID = 318 AND Record_ID= ? ", get_ID());
+				if (!msg.equals("RECIBIDA")) {
 
-						if (exist <= 0) {
-							MNote note = new MNote(getCtx(), 0, null);
-							note.setAD_Table_ID(MInvoice.Table_ID);
-							note.setReference("Error en Factura de venta, por favor valide la info del documento: "
-									+ getDocumentNo());
-							note.setAD_Org_ID(getAD_Org_ID());
-							note.setTextMsg(msg);
-							note.setAD_Message_ID("ErrorFE");
-							note.setRecord(MInvoice.Table_ID, getC_Invoice_ID());
-							note.setAD_User_ID(MSysConfig.getIntValue("ING_FEUserNotes", 100, getAD_Client_ID()));
-							note.setDescription(getDocumentNo());
-							set_Value("IsSRI_Error", true);
-							note.saveEx();
-							invoice.set_ValueOfColumn("IsSriError", true);
-							invoice.saveEx();
-						}
+					int exist = DB.getSQLValue(null,
+							"SELECT Record_id FROM AD_Note WHERE AD_Table_ID = 318 AND Record_ID= ? ", get_ID());
 
-						// TODO Agregar al OffLine el error Maybe ADNote
-						return "Error en Liquidación No " + getDocumentNo() + " " + msg;
+					if (exist <= 0) {
+						MNote note = new MNote(getCtx(), 0, null);
+						note.setAD_Table_ID(MInvoice.Table_ID);
+						note.setReference("Error en Factura de venta, por favor valide la info del documento: "
+								+ getDocumentNo());
+						note.setAD_Org_ID(getAD_Org_ID());
+						note.setTextMsg(msg);
+						note.setAD_Message_ID("ErrorFE");
+						note.setRecord(MInvoice.Table_ID, getC_Invoice_ID());
+						note.setAD_User_ID(MSysConfig.getIntValue("ING_FEUserNotes", 100, getAD_Client_ID()));
+						note.setDescription(getDocumentNo());
+						set_Value("IsSRI_Error", true);
+						note.saveEx();
+						invoice.set_ValueOfColumn("IsSriError", true);
+						invoice.saveEx();
 					}
+
+					// TODO Agregar al OffLine el error Maybe ADNote
+					return "Error en Liquidación No " + getDocumentNo() + " " + msg;
+				}
 				String invoiceNo = getDocumentNo();
 				String invoiceID = String.valueOf(get_ID());
 				a.setDescription(invoiceNo);
@@ -671,7 +670,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 				// 170-Clave de contingencia pendiente
 
 				// 70-Clave de acceso en procesamiento
-				
+
 				a.saveEx();
 
 				if (signature.isAttachXml())

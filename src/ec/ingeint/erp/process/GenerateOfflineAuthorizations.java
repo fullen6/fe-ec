@@ -80,10 +80,9 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 			if (name.equals(MInvoice.COLUMNNAME_DateAcct)) {
 				DateAcct = para[i].getParameterAsTimestamp();
 				DateAcctTo = para[i].getParameter_ToAsTimestamp();
-			}
-			else if (name.equals("TableName")) {
+			} else if (name.equals("TableName")) {
 				if (para[i].getParameterAsString() != null)
-					TableName = new String[] {para[i].getParameterAsString()};
+					TableName = new String[] { para[i].getParameterAsString() };
 			} else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -101,7 +100,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 
 		String msg = "";
 		System.setProperty("javax.xml.soap.SAAJMetaFactory", "com.sun.xml.messaging.saaj.soap.SAAJMetaFactoryImpl");
-		
+
 		if (TableName != null)
 			m_tables = TableName;
 
@@ -110,9 +109,7 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 			//
 			String sql = null;
 
-			sql = "SELECT * " 
-			        + "FROM " + table + " a " 
-			        + "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
+			sql = "SELECT * " + "FROM " + table + " a " + "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
 					+ "JOIN SRI_Authorization au on au.SRI_Authorization_ID = a.SRI_Authorization_ID "
 					+ " WHERE a.AD_Client_ID=? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
 					+ " AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus IN  ('CO', 'CL') "
@@ -120,6 +117,20 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 
 			if (DateAcct != null && !table.equals("M_Movement"))
 				sql = sql + " AND a.DateAcct between ? AND ? ";
+
+			if (table.equals("C_Invoice")) { // Search the purchase liquidation
+
+				sql = sql + "UNION ALL SELECT * " + "FROM " + table + " a "
+						+ "JOIN C_DocType dt on a.C_DocType_ID = dt.C_DocType_ID "
+						+ "JOIN SRI_Authorization au on au.SRI_Authorization_ID = a.SRI_AuthorizationPL_ID "
+						+ "WHERE a.AD_Client_ID= ? " + " AND a.IsActive = 'Y' AND a.Processed = 'Y' "
+						+ "AND a.isSRIOfflineSchema = 'Y' " + " AND a.docstatus IN  ('CO', 'CL') "
+						+ "AND a.issri_error = 'N' AND dt.sri_shortdoctype notnull AND au.IsToSend = 'Y' ";
+
+				if (DateAcct != null)
+					sql = sql + " AND a.DateAcct between ? AND ? ";
+
+			}
 
 			PreparedStatement pstmt = null;
 			try {
@@ -129,6 +140,14 @@ public class GenerateOfflineAuthorizations extends SvrProcess {
 				if (DateAcct != null && !table.equals("M_Movement")) {
 					pstmt.setTimestamp(index++, DateAcct);
 					pstmt.setTimestamp(index++, DateAcctTo);
+					if (table.equals("C_Invoice")) {
+						pstmt.setInt(index++, getAD_Client_ID());
+						if (DateAcct != null && !table.equals("M_Movement")) {
+							pstmt.setTimestamp(index++, DateAcct);
+							pstmt.setTimestamp(index++, DateAcctTo);
+						}
+					}
+
 				}
 
 			} catch (Exception e) {

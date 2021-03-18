@@ -15,6 +15,7 @@ import org.globalqss.process.SRIReprocessAuthorization;
 import ec.ingeint.erp.process.LEC_InvoiceGenerate;
 import ec.ingeint.erp.process.SRIGeneateOffLineAutForDocument;
 import ec.ingeint.erp.process.SRIGenerateAccesCode;
+import ec.ingeint.erp.process.SendAuthorizationSRI;
 import ec.ingeint.erp.process.GenerateOfflineAuthorizations;
 import ec.ingeint.erp.process.ProcessOfflineAuthorizations;
 
@@ -92,6 +93,12 @@ public class LEC_FE_ProcessFactory implements IProcessFactory {
 			try {
 				process = SRIGenerateAccesCode.class.getConstructor().newInstance();
 			} catch (Exception e) {
+			}
+		} else if (SendAuthorizationSRI.class.getCanonicalName().equals(className)) {
+			try {
+				process = SendAuthorizationSRI.class.getConstructor().newInstance();
+			} catch (Exception e) {
+
 			}
 		}
 
