@@ -23,7 +23,7 @@ import org.compiere.util.KeyNamePair;
 
 /** Generated Interface for SRI_Authorization
  *  @author iDempiere (generated) 
- *  @version Release 2.0
+ *  @version Release 7.1
  */
 @SuppressWarnings("all")
 public interface I_SRI_Authorization 
@@ -32,7 +32,7 @@ public interface I_SRI_Authorization
     /** TableName=SRI_Authorization */
     public static final String Table_Name = "SRI_Authorization";
 
-    /** AD_Table_ID=1000012 */
+    /** AD_Table_ID=1000014 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -77,7 +77,22 @@ public interface I_SRI_Authorization
 	  */
 	public int getAD_UserMail_ID();
 
-	public org.compiere.model.I_AD_UserMail getAD_UserMail() throws RuntimeException;
+	public org.compiere.model.I_AD_User getAD_UserMail() throws RuntimeException;
+
+    /** Column name C_Invoice_ID */
+    public static final String COLUMNNAME_C_Invoice_ID = "C_Invoice_ID";
+
+	/** Set Invoice.
+	  * Invoice Identifier
+	  */
+	public void setC_Invoice_ID (int C_Invoice_ID);
+
+	/** Get Invoice.
+	  * Invoice Identifier
+	  */
+	public int getC_Invoice_ID();
+
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException;
 
     /** Column name ContingencyProcessing */
     public static final String COLUMNNAME_ContingencyProcessing = "ContingencyProcessing";
@@ -117,6 +132,15 @@ public interface I_SRI_Authorization
 	  */
 	public String getDescription();
 
+    /** Column name DocumentID */
+    public static final String COLUMNNAME_DocumentID = "DocumentID";
+
+	/** Set DocumentID	  */
+	public void setDocumentID (int DocumentID);
+
+	/** Get DocumentID	  */
+	public int getDocumentID();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -130,6 +154,42 @@ public interface I_SRI_Authorization
 	  */
 	public boolean isActive();
 
+    /** Column name IsSRI_Error */
+    public static final String COLUMNNAME_IsSRI_Error = "IsSRI_Error";
+
+	/** Set IsSRI_Error	  */
+	public void setIsSRI_Error (boolean IsSRI_Error);
+
+	/** Get IsSRI_Error	  */
+	public boolean isSRI_Error();
+
+    /** Column name isSRIOfflineSchema */
+    public static final String COLUMNNAME_isSRIOfflineSchema = "isSRIOfflineSchema";
+
+	/** Set Is SRI Offline Schema	  */
+	public void setisSRIOfflineSchema (boolean isSRIOfflineSchema);
+
+	/** Get Is SRI Offline Schema	  */
+	public boolean isSRIOfflineSchema();
+
+    /** Column name istosend */
+    public static final String COLUMNNAME_istosend = "istosend";
+
+	/** Set istosend	  */
+	public void setistosend (boolean istosend);
+
+	/** Get istosend	  */
+	public boolean istosend();
+
+    /** Column name IsVoided */
+    public static final String COLUMNNAME_IsVoided = "IsVoided";
+
+	/** Set Voided	  */
+	public void setIsVoided (boolean IsVoided);
+
+	/** Get Voided	  */
+	public boolean isVoided();
+
     /** Column name Mailing */
     public static final String COLUMNNAME_Mailing = "Mailing";
 
@@ -138,6 +198,36 @@ public interface I_SRI_Authorization
 
 	/** Get Mailing	  */
 	public String getMailing();
+
+    /** Column name M_InOut_ID */
+    public static final String COLUMNNAME_M_InOut_ID = "M_InOut_ID";
+
+	/** Set Shipment/Receipt.
+	  * Material Shipment Document
+	  */
+	public void setM_InOut_ID (int M_InOut_ID);
+
+	/** Get Shipment/Receipt.
+	  * Material Shipment Document
+	  */
+	public int getM_InOut_ID();
+
+	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException;
+
+    /** Column name M_Movement_ID */
+    public static final String COLUMNNAME_M_Movement_ID = "M_Movement_ID";
+
+	/** Set Inventory Move.
+	  * Movement of Inventory
+	  */
+	public void setM_Movement_ID (int M_Movement_ID);
+
+	/** Get Inventory Move.
+	  * Movement of Inventory
+	  */
+	public int getM_Movement_ID();
+
+	public org.compiere.model.I_M_Movement getM_Movement() throws RuntimeException;
 
     /** Column name Processed */
     public static final String COLUMNNAME_Processed = "Processed";
@@ -207,6 +297,15 @@ public interface I_SRI_Authorization
 
 	/** Get SRI_Authorization_UU	  */
 	public String getSRI_Authorization_UU();
+
+    /** Column name SRI_BugInventory */
+    public static final String COLUMNNAME_SRI_BugInventory = "SRI_BugInventory";
+
+	/** Set Bug Inventory	  */
+	public void setSRI_BugInventory (String SRI_BugInventory);
+
+	/** Get Bug Inventory	  */
+	public String getSRI_BugInventory();
 
     /** Column name SRI_ErrorCode_ID */
     public static final String COLUMNNAME_SRI_ErrorCode_ID = "SRI_ErrorCode_ID";

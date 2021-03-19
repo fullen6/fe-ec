@@ -24,12 +24,6 @@ public class SendAuthorizationSRI extends SvrProcess {
 	private static CLogger log = CLogger.getCLogger(SendAuthorizationSRI.class);
 	Timestamp DateAcct = null;
 	Timestamp DateAcctTo = null;
-	final static String SRI_Invoice = "01";
-	final static String SRI_PurchaseLiquidation = "03";
-	final static String SRI_CreditMemo = "04";
-	final static String SRI_DebitMemo = "05";
-	final static String SRI_Shipment = "06";
-	final static String SRI_Withholding = "07";
 
 	@Override
 	protected void prepare() {
@@ -61,27 +55,27 @@ public class SendAuthorizationSRI extends SvrProcess {
 			int record_id = auth.get_ValueAsInt("documentid");
 			
 
-			if (auth.getSRI_ShortDocType().equals(SRI_Invoice)) {
+			if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Invoice)) {
 				LEC_FE_MInvoice lecfeinv = new LEC_FE_MInvoice(getCtx(), record_id, get_TrxName());
 				msg = lecfeinv.lecfeinv_SriExportInvoiceXML100();
 				counter(msg, count);
-			} else if (auth.getSRI_ShortDocType().equals(SRI_PurchaseLiquidation)) {
+			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_PurchaseLiquidation)) {
 				LEC_FE_MInvoicePL lecfeinvpl = new LEC_FE_MInvoicePL(getCtx(), record_id, get_TrxName());
 				msg = lecfeinvpl.lecfeinv_SriExportInvoicePLXML100();
 				counter(msg, count);
-			} else if (auth.getSRI_ShortDocType().equals(SRI_CreditMemo)) {
+			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_CreditMemo)) {
 				LEC_FE_MNotaCredito lecfeinvnc = new LEC_FE_MNotaCredito(getCtx(), record_id, get_TrxName());
 				msg = lecfeinvnc.lecfeinvnc_SriExportNotaCreditoXML100();
 				counter(msg, count);
-			} else if (auth.getSRI_ShortDocType().equals(SRI_DebitMemo)) {
+			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_DebitMemo)) {
 				LEC_FE_MNotaDebito lecfeinvnd = new LEC_FE_MNotaDebito(getCtx(), record_id, get_TrxName());
 				msg = lecfeinvnd.lecfeinvnd_SriExportNotaDebitoXML100();
 				counter(msg, count);
-			} else if (auth.getSRI_ShortDocType().equals(SRI_Shipment)) {
+			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Shipment)) {
 				LEC_FE_MInOut lecfeinout = new LEC_FE_MInOut(getCtx(), record_id, get_TrxName());
 				msg = lecfeinout.lecfeinout_SriExportInOutXML100();	
 				counter(msg, count);
-			} else if (auth.getSRI_ShortDocType().equals(SRI_Withholding)) {
+			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Withholding)) {
 				LEC_FE_MRetencion lecfeinvret = new LEC_FE_MRetencion(getCtx(), record_id, get_TrxName());
 				if (new BigDecimal(lecfeinvret.get_ValueAsString("WithholdingAmt")).signum() > 0) {
 					LEC_FE_MRetencion.generateWitholdingNo(lecfeinvret);					

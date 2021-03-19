@@ -24,14 +24,14 @@ import org.compiere.model.*;
 
 /** Generated Model for SRI_Authorization
  *  @author iDempiere (generated) 
- *  @version Release 2.0 - $Id$ */
+ *  @version Release 7.1 - $Id$ */
 public class X_SRI_Authorization extends PO implements I_SRI_Authorization, I_Persistent 
 {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140829L;
+	private static final long serialVersionUID = 20210319L;
 
     /** Standard Constructor */
     public X_SRI_Authorization (Properties ctx, int SRI_Authorization_ID, String trxName)
@@ -75,9 +75,9 @@ public class X_SRI_Authorization extends PO implements I_SRI_Authorization, I_Pe
       return sb.toString();
     }
 
-	public org.compiere.model.I_AD_UserMail getAD_UserMail() throws RuntimeException
+	public org.compiere.model.I_AD_User getAD_UserMail() throws RuntimeException
     {
-		return (org.compiere.model.I_AD_UserMail)MTable.get(getCtx(), org.compiere.model.I_AD_UserMail.Table_Name)
+		return (org.compiere.model.I_AD_User)MTable.get(getCtx(), org.compiere.model.I_AD_User.Table_Name)
 			.getPO(getAD_UserMail_ID(), get_TrxName());	}
 
 	/** Set User Mail.
@@ -98,6 +98,34 @@ public class X_SRI_Authorization extends PO implements I_SRI_Authorization, I_Pe
 	public int getAD_UserMail_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_AD_UserMail_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_C_Invoice getC_Invoice() throws RuntimeException
+    {
+		return (org.compiere.model.I_C_Invoice)MTable.get(getCtx(), org.compiere.model.I_C_Invoice.Table_Name)
+			.getPO(getC_Invoice_ID(), get_TrxName());	}
+
+	/** Set Invoice.
+		@param C_Invoice_ID 
+		Invoice Identifier
+	  */
+	public void setC_Invoice_ID (int C_Invoice_ID)
+	{
+		if (C_Invoice_ID < 1) 
+			set_Value (COLUMNNAME_C_Invoice_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Invoice_ID, Integer.valueOf(C_Invoice_ID));
+	}
+
+	/** Get Invoice.
+		@return Invoice Identifier
+	  */
+	public int getC_Invoice_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Invoice_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
@@ -134,6 +162,107 @@ public class X_SRI_Authorization extends PO implements I_SRI_Authorization, I_Pe
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** Set DocumentID.
+		@param DocumentID DocumentID	  */
+	public void setDocumentID (int DocumentID)
+	{
+		set_Value (COLUMNNAME_DocumentID, Integer.valueOf(DocumentID));
+	}
+
+	/** Get DocumentID.
+		@return DocumentID	  */
+	public int getDocumentID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DocumentID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set IsSRI_Error.
+		@param IsSRI_Error IsSRI_Error	  */
+	public void setIsSRI_Error (boolean IsSRI_Error)
+	{
+		set_Value (COLUMNNAME_IsSRI_Error, Boolean.valueOf(IsSRI_Error));
+	}
+
+	/** Get IsSRI_Error.
+		@return IsSRI_Error	  */
+	public boolean isSRI_Error () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSRI_Error);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Is SRI Offline Schema.
+		@param isSRIOfflineSchema Is SRI Offline Schema	  */
+	public void setisSRIOfflineSchema (boolean isSRIOfflineSchema)
+	{
+		set_Value (COLUMNNAME_isSRIOfflineSchema, Boolean.valueOf(isSRIOfflineSchema));
+	}
+
+	/** Get Is SRI Offline Schema.
+		@return Is SRI Offline Schema	  */
+	public boolean isSRIOfflineSchema () 
+	{
+		Object oo = get_Value(COLUMNNAME_isSRIOfflineSchema);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set istosend.
+		@param istosend istosend	  */
+	public void setistosend (boolean istosend)
+	{
+		set_Value (COLUMNNAME_istosend, Boolean.valueOf(istosend));
+	}
+
+	/** Get istosend.
+		@return istosend	  */
+	public boolean istosend () 
+	{
+		Object oo = get_Value(COLUMNNAME_istosend);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Voided.
+		@param IsVoided Voided	  */
+	public void setIsVoided (boolean IsVoided)
+	{
+		set_Value (COLUMNNAME_IsVoided, Boolean.valueOf(IsVoided));
+	}
+
+	/** Get Voided.
+		@return Voided	  */
+	public boolean isVoided () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsVoided);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set Mailing.
 		@param Mailing Mailing	  */
 	public void setMailing (String Mailing)
@@ -146,6 +275,62 @@ public class X_SRI_Authorization extends PO implements I_SRI_Authorization, I_Pe
 	public String getMailing () 
 	{
 		return (String)get_Value(COLUMNNAME_Mailing);
+	}
+
+	public org.compiere.model.I_M_InOut getM_InOut() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_InOut)MTable.get(getCtx(), org.compiere.model.I_M_InOut.Table_Name)
+			.getPO(getM_InOut_ID(), get_TrxName());	}
+
+	/** Set Shipment/Receipt.
+		@param M_InOut_ID 
+		Material Shipment Document
+	  */
+	public void setM_InOut_ID (int M_InOut_ID)
+	{
+		if (M_InOut_ID < 1) 
+			set_Value (COLUMNNAME_M_InOut_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_InOut_ID, Integer.valueOf(M_InOut_ID));
+	}
+
+	/** Get Shipment/Receipt.
+		@return Material Shipment Document
+	  */
+	public int getM_InOut_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_InOut_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public org.compiere.model.I_M_Movement getM_Movement() throws RuntimeException
+    {
+		return (org.compiere.model.I_M_Movement)MTable.get(getCtx(), org.compiere.model.I_M_Movement.Table_Name)
+			.getPO(getM_Movement_ID(), get_TrxName());	}
+
+	/** Set Inventory Move.
+		@param M_Movement_ID 
+		Movement of Inventory
+	  */
+	public void setM_Movement_ID (int M_Movement_ID)
+	{
+		if (M_Movement_ID < 1) 
+			set_Value (COLUMNNAME_M_Movement_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_Movement_ID, Integer.valueOf(M_Movement_ID));
+	}
+
+	/** Get Inventory Move.
+		@return Movement of Inventory
+	  */
+	public int getM_Movement_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Movement_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Processed.
@@ -273,6 +458,20 @@ public class X_SRI_Authorization extends PO implements I_SRI_Authorization, I_Pe
 		return (String)get_Value(COLUMNNAME_SRI_Authorization_UU);
 	}
 
+	/** Set Bug Inventory.
+		@param SRI_BugInventory Bug Inventory	  */
+	public void setSRI_BugInventory (String SRI_BugInventory)
+	{
+		set_Value (COLUMNNAME_SRI_BugInventory, SRI_BugInventory);
+	}
+
+	/** Get Bug Inventory.
+		@return Bug Inventory	  */
+	public String getSRI_BugInventory () 
+	{
+		return (String)get_Value(COLUMNNAME_SRI_BugInventory);
+	}
+
 	public org.globalqss.model.I_SRI_ErrorCode getSRI_ErrorCode() throws RuntimeException
     {
 		return (org.globalqss.model.I_SRI_ErrorCode)MTable.get(getCtx(), org.globalqss.model.I_SRI_ErrorCode.Table_Name)
@@ -308,6 +507,8 @@ public class X_SRI_Authorization extends PO implements I_SRI_Authorization, I_Pe
 	public static final String SRI_SHORTDOCTYPE_Shipment = "06";
 	/** Withholding = 07 */
 	public static final String SRI_SHORTDOCTYPE_Withholding = "07";
+	/** Purchase Liquidation = 03 */
+	public static final String SRI_SHORTDOCTYPE_PurchaseLiquidation = "03";
 	/** Set SRI Short DocType.
 		@param SRI_ShortDocType SRI Short DocType	  */
 	public void setSRI_ShortDocType (String SRI_ShortDocType)

@@ -3,6 +3,7 @@ package org.globalqss.model;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Properties;
 
 import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.IEventTopics;
@@ -58,6 +59,8 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		registerTableEvent(IEventTopics.DOC_BEFORE_COMPLETE, MMovement.Table_Name);
 		registerTableEvent(IEventTopics.DOC_BEFORE_COMPLETE, MInvoice.Table_Name);
 		registerTableEvent(IEventTopics.DOC_AFTER_COMPLETE, MMovement.Table_Name);
+		registerTableEvent(IEventTopics.DOC_AFTER_REVERSECORRECT, MInvoice.Table_Name);
+		registerTableEvent(IEventTopics.DOC_AFTER_REVERSECORRECT, MInOut.Table_Name);
 
 		// New events capture for offline schema
 		registerTableEvent(IEventTopics.DOC_AFTER_PREPARE, MInvoice.Table_Name);
@@ -90,6 +93,16 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 		// 04/07/2016 MHG Offline Schema added
 		isOfflineSchema = MSysConfig.getBooleanValue("QSSLEC_FE_OfflineSchema", false,
 				Env.getAD_Client_ID(Env.getCtx()));
+
+		if (po.get_TableName().equals(MInvoice.Table_Name) && type.equals(IEventTopics.DOC_AFTER_REVERSECORRECT)) {
+			MInvoice invoice = (MInvoice) po;
+			ReverseSriAuthorization(invoice);
+		}
+
+		if (po.get_TableName().equals(MInOut.Table_Name) && type.equals(IEventTopics.DOC_AFTER_REVERSECORRECT)) {
+			MInOut inout = (MInOut) po;
+			ReverseSriAuthorization(inout);
+		}
 
 		if (po.get_TableName().equals(MInOut.Table_Name) && type.equals(IEventTopics.PO_BEFORE_NEW)) {
 			MInOut inout = (MInOut) po;
@@ -158,9 +171,8 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 					&& invoice.getGrandTotal().signum() > 0) {
 
 				int count = DB.getSQLValue(invoice.get_TrxName(),
-						"SELECT COUNT(*) " + 
-								"FROM LCO_InvoiceWithholding iw " +
-								"JOIN C_Invoice i on i.C_Invoice_ID = iw.C_Invoice_ID "
+						"SELECT COUNT(*) " + "FROM LCO_InvoiceWithholding iw "
+								+ "JOIN C_Invoice i on i.C_Invoice_ID = iw.C_Invoice_ID "
 								+ "WHERE iw.C_Invoice_ID = ? AND i.IssoTrx = 'N' ",
 						invoice.getC_Invoice_ID());
 
@@ -172,7 +184,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 					if (count > 0) {
 
 						String withholding_no = LEC_FE_MRetencion.generateWitholdingNo(invoice);
-						
+
 						X_SRI_Authorization wh_auth = new X_SRI_Authorization(invoice.getCtx(), 0,
 								invoice.get_TrxName());
 
@@ -442,6 +454,27 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			}
 
 		}
+	}
+
+	private void ReverseSriAuthorization(MInvoice invoice) {
+		if (invoice.get_ValueAsInt("SRI_Authorization_ID") > 0) {
+			voidAuth(invoice.getCtx(), invoice.get_ValueAsInt("SRI_Authorization_ID"), invoice.get_TrxName());
+		}
+
+		if (invoice.get_ValueAsInt("SRI_AuthorizationPL_ID") > 0) {
+			voidAuth(invoice.getCtx(), invoice.get_ValueAsInt("SRI_AuthorizationPL_ID"), invoice.get_TrxName());
+		}
+	}
+
+	private void voidAuth(Properties ctx, int SRI_Authorization_ID, String trxName) {
+		X_SRI_Authorization auth = new X_SRI_Authorization(ctx, SRI_Authorization_ID, trxName);
+		auth.setIsVoided(true);
+		auth.saveEx();
+
+	}
+
+	private void ReverseSriAuthorization(MInOut inout) {
+		voidAuth(inout.getCtx(), inout.get_ValueAsInt("SRI_Authorization_ID"), inout.get_TrxName());
 	}
 
 	private String generateAccessCode(MMovement movement) {
