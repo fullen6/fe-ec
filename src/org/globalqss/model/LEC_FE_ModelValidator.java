@@ -264,7 +264,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
 			//
-			if (!shortdoctype.equals("") && !isOfflineSchema) {
+			if (shortdoctype !=null && !shortdoctype.equals("") && !isOfflineSchema) {
 
 				msg = inoutGenerateXml(inout);
 
