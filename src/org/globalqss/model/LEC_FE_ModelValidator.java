@@ -289,7 +289,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 				MDocType dt = new MDocType(inout.getCtx(), inout.getC_DocType_ID(), inout.get_TrxName());
 				String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
-				if (isOfflineSchema && shortdoctype != "")
+				if (isOfflineSchema && shortdoctype !=null && shortdoctype != "")
 					inout.set_ValueOfColumn("isSRIOfflineSchema", "Y");
 				else
 					inout.set_ValueOfColumn("isSRIOfflineSchema", "N");
@@ -722,7 +722,7 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 
 		String shortdoctype = dt.get_ValueAsString("SRI_ShortDocType");
 
-		if (shortdoctype.equals("")) {
+		if (shortdoctype.equals("") || shortdoctype == null) {
 			msg = "No existe definicion SRI_ShortDocType: " + dt.toString();
 			log.info("Invoice: " + inout.toString() + msg);
 
