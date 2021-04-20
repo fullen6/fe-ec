@@ -472,7 +472,6 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 			auth.setIsVoided(true);
 			auth.saveEx();
 		}
-
 	}
 
 	private void ReverseSriAuthorization(MInOut inout) {
