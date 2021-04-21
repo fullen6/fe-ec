@@ -56,7 +56,6 @@ public class LEC_FE_MInOut extends MInOut {
 	private String file_name = "";
 	private String m_obligadocontabilidad = "NO";
 	private String m_coddoc = "";
-	private String m_accesscode;
 	private String m_identificacionconsumidor = "";
 	private String m_tipoidentificacioncomprador = "";
 	private String m_tipoidentificaciontransportista = "";
@@ -216,12 +215,12 @@ public class LEC_FE_MInOut extends MInOut {
 			msgStatus = "AccessCode";
 			
 			X_SRI_AccessCode ac = null;
-			ac = new X_SRI_AccessCode(getCtx(), a.getSRI_AccessCode_ID(), get_TrxName());			
+			ac = new X_SRI_AccessCode(getCtx(), a.getSRI_AccessCode_ID(), get_TrxName());
 
 			OutputStream mmDocStream = null;
 
 			String xmlFileName = "SRI_" + m_coddoc + "-" + LEC_FE_Utils.getDate(getMovementDate(), 9) + "-"
-					+ m_accesscode + ".xml";
+					+ a.getValue() + ".xml";
 
 			// ruta completa del archivo xml
 			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesGenerados
@@ -290,6 +289,8 @@ public class LEC_FE_MInOut extends MInOut {
 					'0')) + LEC_FE_Utils.cutString(LEC_FE_Utils.getSecuencial(getDocumentNo(), m_coddoc), 9), atts);
 			// Alfanumerico Max 300
 			addHeaderElement(mmDoc, "dirMatriz", lm.getAddress1(), atts);
+			if (oi.get_ValueAsBoolean("IsWithholdingAgent"))
+				addHeaderElement(mmDoc, "agenteRetencion", oi.get_ValueAsString("WithholdingResolution"), atts);
 			mmDoc.endElement("", "", "infoTributaria");
 
 			mmDoc.startElement("", "", "infoGuiaRemision", atts);
@@ -310,7 +311,9 @@ public class LEC_FE_MInOut extends MInOut {
 			// Texto2
 			addHeaderElement(mmDoc, "obligadoContabilidad", m_obligadocontabilidad, atts);
 			// Numerico3-5
-			addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			if (oi.get_Value("SRI_TaxPayerCode") != null || !oi.get_ValueAsString("SRI_TaxPayerCode").equals("")) {
+				addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			}
 			// Fecha8 ddmmaaaa
 			addHeaderElement(mmDoc, "fechaIniTransporte", LEC_FE_Utils.getDate(new Date((datets).getTime()), 10), atts);
 			// Fecha8 ddmmaaaa
@@ -452,11 +455,18 @@ public class LEC_FE_MInOut extends MInOut {
 								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
 								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
 					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
+						a.set_ValueOfColumn("IsToSend", false);
+						a.saveEx();
+						msg = null;
 						this.saveEx();
 						return ErrorDocumentno + msg;
 					}
 
 				if (!msg.equals("RECIBIDA")) {
+					
+					a.set_ValueOfColumn("issri_error", true);
+					a.set_ValueOfColumn("IsToSend", false);
+					a.saveEx();
 					return ErrorDocumentno + msg;
 				} 
 
@@ -466,7 +476,7 @@ public class LEC_FE_MInOut extends MInOut {
 					// Procesar Autorizacion SRI
 					log.warning("@Authorizing Xml@ -> " + file_name);
 					try {
-						msg = signature.respuestaAutorizacionComprobante(ac, a, m_accesscode);
+						msg = signature.respuestaAutorizacionComprobante(ac, a, a.getValue());
 
 						if (msg != null) {
 							return ErrorDocumentno + msg;
@@ -508,6 +518,8 @@ public class LEC_FE_MInOut extends MInOut {
 			return ErrorDocumentno + msg;
 		}
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
+		a.set_ValueOfColumn("IsToSend", false);
+		a.saveEx();
 		return msg;
 
 	} // lecfeinout_SriExportInOutXML100

@@ -240,6 +240,8 @@ public class LEC_FE_MNotaCredito extends MInvoice
 					+ LEC_FE_Utils.cutString(LEC_FE_Utils.getSecuencial(getDocumentNo(), m_coddoc), 9), atts);
 			// dirMatriz ,Alfanumerico Max 300
 			addHeaderElement(mmDoc, "dirMatriz", lm.getAddress1(), atts);
+			if (oi.get_ValueAsBoolean("IsWithholdingAgent"))
+				addHeaderElement(mmDoc, "agenteRetencion", oi.get_ValueAsString("WithholdingResolution"), atts);
 			mmDoc.endElement("","","infoTributaria");
 
 			mmDoc.startElement("","","infoNotaCredito",atts);
@@ -256,7 +258,9 @@ public class LEC_FE_MNotaCredito extends MInvoice
 			// Numerico Max 13
 			addHeaderElement(mmDoc, "identificacionComprador", m_identificacioncomprador, atts);
 			// Numerico3-5
-			addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			if (oi.get_Value("SRI_TaxPayerCode") != null || !oi.get_ValueAsString("SRI_TaxPayerCode").equals("")) {
+				addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			}
 			// Texto2
 			addHeaderElement(mmDoc, "obligadoContabilidad", m_obligadocontabilidad, atts);
 			// Alfanumerico Max 40

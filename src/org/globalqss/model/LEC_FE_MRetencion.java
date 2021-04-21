@@ -247,6 +247,8 @@ public class LEC_FE_MRetencion extends MInvoice {
 					+ LEC_FE_Utils.cutString(LEC_FE_Utils.getSecuencial(m_retencionno, m_coddoc), 9), atts);
 			// dirMatriz ,Alfanumerico Max 300
 			addHeaderElement(mmDoc, "dirMatriz", lm.getAddress1(), atts);
+			if (oi.get_ValueAsBoolean("IsWithholdingAgent"))
+				addHeaderElement(mmDoc, "agenteRetencion", oi.get_ValueAsString("WithholdingResolution"), atts);
 			mmDoc.endElement("", "", "infoTributaria");
 
 			mmDoc.startElement("", "", "infoCompRetencion", atts);
@@ -256,7 +258,9 @@ public class LEC_FE_MRetencion extends MInvoice {
 			// Alfanumerico Max 300
 			addHeaderElement(mmDoc, "dirEstablecimiento", lo.getAddress1(), atts);
 			// Numerico3-5
-			addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			if (oi.get_Value("SRI_TaxPayerCode") != null || !oi.get_ValueAsString("SRI_TaxPayerCode").equals("")) {
+				addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			}
 			// Texto2
 			addHeaderElement(mmDoc, "obligadoContabilidad", m_obligadocontabilidad, atts);
 			// Comprador
@@ -413,20 +417,22 @@ public class LEC_FE_MRetencion extends MInvoice {
 				msg = signature.respuestaRecepcionComprobante(file_name);
 
 				if (msg != null)
-					if (msg.contains("DEVUELTA-ERROR-43-CLAVE")) {
+					if (msg.contains("ERROR-65"))
+						DB.executeUpdateEx(
+								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
+								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
+					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 						a.set_ValueOfColumn("IsToSend", false);
+						a.setSRI_AuthorizationCode(a.getValue());
 						a.saveEx();
+						msg = null;
+
+						file_name = signature.getFilename(signature, LEC_FE_UtilsXml.folderComprobantesEnProceso);
+
+						log.warning("@SRI_FileGenerated@ -> " + file_name);
+						this.saveEx();
+						return msg;
 					}
-
-				if (msg.contains("ERROR-65"))
-					DB.executeUpdateEx(
-							"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
-							new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
-				else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
-
-					this.saveEx();
-					return ErrorDocumentno + msg;
-				}
 
 				if (!msg.equals("RECIBIDA")) {
 					String DocumentNo = DB.getSQLValueString(get_TrxName(),

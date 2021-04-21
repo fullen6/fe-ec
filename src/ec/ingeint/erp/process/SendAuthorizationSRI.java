@@ -83,16 +83,16 @@ public class SendAuthorizationSRI extends SvrProcess {
 				msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
 				counter(msg, count);
 			}
+			
+			if (msg == null)
+				count++;	
 		}
 
 		return "Procesados: "+count;
 	}
 	
 	private void counter(String msg, int count) {
-		
 		if (msg == null)
-			count++;		
-		
+			count++;
 	}
-
 }

@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/jdom-2.0.5/jdom-2.0.5.jar"/>
-	<classpathentry kind="lib" path="lib/cliente-sri-offline-1.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/FacturacionElectronica-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/cliente-ws-offline-cliente-ws-offline.jar"/>
-	<classpathentry kind="lib" path="lib/org.apache.karaf.specs.java.xml.ws-4.2.7.jar"/>
-	<classpathentry kind="lib" path="lib/jaxws-api-2.1-1.jar"/>
-	<classpathentry kind="lib" path="lib/javax.xml.bind.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.xml.bind.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxws-api-2.1-1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
@@ -28,5 +23,8 @@
 	<classpathentry kind="lib" path="lib/MITyCLibXADES-1.1.7.jar"/>
 	<classpathentry kind="lib" path="lib/xmlsec-1.4.2-ADSI-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jdom-2.0.5/jdom-2.0.5.jar"/>
+	<classpathentry kind="lib" path="lib/org.apache.karaf.specs.java.xml.ws-4.2.7.jar"/>
+	<classpathentry kind="lib" path="/home/lperez/Workspace/sources/Asistanet/fe-ec/lib/jaxws-api-2.1-1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -52,7 +52,6 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 	private String file_name = "";
 	private String m_obligadocontabilidad = "NO";
 	private String m_coddoc = "";
-	private String m_accesscode;
 	private String m_tipoidentificacioncomprador = "";
 	private String m_identificacioncomprador = "";
 	private String m_razonsocial = "";
@@ -166,7 +165,7 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			OutputStream mmDocStream = null;
 
 			String xmlFileName = "SRI_" + m_coddoc + "-" + LEC_FE_Utils.getDate(getDateInvoiced(), 9) + "-"
-					+ m_accesscode + ".xml";
+					+ a.getValue() + ".xml";
 
 			// ruta completa del archivo xml
 			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesGenerados
@@ -234,6 +233,8 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 					'0')) + LEC_FE_Utils.cutString(LEC_FE_Utils.getSecuencial(getDocumentNo(), m_coddoc), 9), atts);
 			// dirMatriz ,Alfanumerico Max 300
 			addHeaderElement(mmDoc, "dirMatriz", lm.getAddress1(), atts);
+			if (oi.get_ValueAsBoolean("IsWithholdingAgent"))
+				addHeaderElement(mmDoc, "agenteRetencion", oi.get_ValueAsString("WithholdingResolution"), atts);
 			mmDoc.endElement("", "", "infoTributaria");
 
 			mmDoc.startElement("", "", "infoLiquidacionCompra", atts);
@@ -243,7 +244,9 @@ public class LEC_FE_MInvoicePL extends MInvoice {
 			// Alfanumerico Max 300
 			addHeaderElement(mmDoc, "dirEstablecimiento", lo.getAddress1(), atts);
 			// Numerico3-5
-			addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			if (oi.get_Value("SRI_TaxPayerCode") != null || !oi.get_ValueAsString("SRI_TaxPayerCode").equals("")) {
+				addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			}
 			// Texto2
 			addHeaderElement(mmDoc, "obligadoContabilidad", m_obligadocontabilidad, atts);
 

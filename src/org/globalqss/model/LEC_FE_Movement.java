@@ -30,6 +30,7 @@ import org.compiere.model.MSysConfig;
 import org.compiere.util.AdempiereUserError;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.globalqss.util.LEC_FE_CreateAccessCode;
 import org.globalqss.util.LEC_FE_Utils;
 import org.globalqss.util.LEC_FE_UtilsXml;
 import org.xml.sax.helpers.AttributesImpl;
@@ -74,6 +75,11 @@ public class LEC_FE_Movement extends MMovement {
 		String msgStatus = "";
 		int autorizationID = 0;
 		LEC_FE_Movement move = new LEC_FE_Movement(getCtx(), getM_Movement_ID(), get_TrxName());
+
+		// New Authorisation
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), move.get_ValueAsInt("SRI_Authorization_ID"),
+				get_TrxName());
+		
 		String msg = null;
 		String ErrorDocumentno = "Error en Movimiento No " + getDocumentNo() + " ";
 
@@ -96,6 +102,15 @@ public class LEC_FE_Movement extends MMovement {
 				//return ErrorDocumentno + "No existe parametro para Ruta Generacion Xml";
 
 			MDocType dt = new MDocType(getCtx(), getC_DocType_ID(), get_TrxName());
+
+			if (a.getSRI_Authorization_ID() ==0) {
+				a = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
+						MMovement.COLUMNNAME_M_Movement_ID, getAD_Org_ID(), getAD_User_ID(),
+						getM_Movement_ID(), dt.get_ValueAsString("SRI_ShortDocType"),
+						getMovementDate(), getDocumentNo(), get_TrxName());
+
+				set_ValueOfColumn("SRI_Authorization_ID", a.getSRI_Authorization_ID());
+			}
 
 			m_coddoc = dt.get_ValueAsString("SRI_ShortDocType");
 
@@ -210,10 +225,6 @@ public class LEC_FE_Movement extends MMovement {
 
 			X_SRI_AccessCode ac = null;
 
-			// New Authorisation
-			X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), move.get_ValueAsInt("SRI_Authorization_ID"),
-					get_TrxName());
-
 			ac = new X_SRI_AccessCode(getCtx(), a.getSRI_AccessCode_ID(), get_TrxName());
 
 			autorizationID = a.get_ID();
@@ -296,6 +307,8 @@ public class LEC_FE_Movement extends MMovement {
 					'0')) + LEC_FE_Utils.cutString(LEC_FE_Utils.getSecuencial(getDocumentNo(), m_coddoc), 9), atts);
 			// Alfanumerico Max 300
 			addHeaderElement(mmDoc, "dirMatriz", lm.getAddress1(), atts);
+			if (oi.get_ValueAsBoolean("IsWithholdingAgent"))
+				addHeaderElement(mmDoc, "agenteRetencion", oi.get_ValueAsString("WithholdingResolution"), atts);
 			mmDoc.endElement("", "", "infoTributaria");
 
 			mmDoc.startElement("", "", "infoGuiaRemision", atts);
@@ -316,7 +329,9 @@ public class LEC_FE_Movement extends MMovement {
 			// Texto2
 			addHeaderElement(mmDoc, "obligadoContabilidad", m_obligadocontabilidad, atts);
 			// Numerico3-5
-			addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			if (oi.get_Value("SRI_TaxPayerCode") != null || !oi.get_ValueAsString("SRI_TaxPayerCode").equals("")) {
+				addHeaderElement(mmDoc, "contribuyenteEspecial", oi.get_ValueAsString("SRI_TaxPayerCode"), atts);
+			}
 			// Fecha8 ddmmaaaa
 			addHeaderElement(mmDoc, "fechaIniTransporte", LEC_FE_Utils.getDate(new Date((datets).getTime()), 10), atts);
 			// Fecha8 ddmmaaaa
@@ -421,6 +436,18 @@ public class LEC_FE_Movement extends MMovement {
 				msg = signature.respuestaRecepcionComprobante(file_name);
 
 				if (msg != null)
+					if (msg.contains("ERROR-65"))
+						DB.executeUpdateEx(
+								"UPDATE M_Movement set issri_error = 'Y', SRI_ErrorInfo = ? WHERE M_Movement_ID = ? ",
+								new Object[] { msg, getM_Movement_ID() }, get_TrxName());
+					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
+						a.set_ValueOfColumn("IsToSend", false);
+						a.saveEx();
+						msg = null;
+						this.saveEx();
+						return msg;
+					}
+					
 					if (msg.equals("RECIBIDA") || msg.contains("REGISTRADA")) {
 
 						String invoiceNo = getDocumentNo();
