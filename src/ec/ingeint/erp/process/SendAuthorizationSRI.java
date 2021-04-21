@@ -15,6 +15,7 @@ import org.globalqss.model.LEC_FE_MInvoice;
 import org.globalqss.model.LEC_FE_MNotaCredito;
 import org.globalqss.model.LEC_FE_MNotaDebito;
 import org.globalqss.model.LEC_FE_MRetencion;
+import org.globalqss.model.LEC_FE_Movement;
 import org.globalqss.model.X_SRI_Authorization;
 
 import ec.ingeint.erp.model.LEC_FE_MInvoicePL;
@@ -67,9 +68,12 @@ public class SendAuthorizationSRI extends SvrProcess {
 			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_DebitMemo)) {
 				LEC_FE_MNotaDebito lecfeinvnd = new LEC_FE_MNotaDebito(getCtx(), record_id, get_TrxName());
 				msg = lecfeinvnd.lecfeinvnd_SriExportNotaDebitoXML100();
-			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Shipment)) {
+			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Shipment) && auth.getM_InOut_ID() > 0) {
 				LEC_FE_MInOut lecfeinout = new LEC_FE_MInOut(getCtx(), record_id, get_TrxName());
 				msg = lecfeinout.lecfeinout_SriExportInOutXML100();
+			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Shipment) && auth.getM_Movement_ID() > 0) { 
+				LEC_FE_Movement lecfemov = new LEC_FE_Movement(getCtx(), record_id, get_TrxName());
+				msg = lecfemov.lecfeMovement_SriExportMovementXML100();				
 			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Withholding)) {
 				LEC_FE_MRetencion lecfeinvret = new LEC_FE_MRetencion(getCtx(), record_id, get_TrxName());
 				if (new BigDecimal(lecfeinvret.get_ValueAsString("WithholdingAmt")).signum() > 0) {

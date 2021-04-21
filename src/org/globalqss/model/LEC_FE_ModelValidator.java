@@ -489,8 +489,10 @@ public class LEC_FE_ModelValidator extends AbstractEventHandler {
 					movement.getM_Movement_ID(), dt.get_ValueAsString("SRI_ShortDocType"), movement.getMovementDate(),
 					movement.getDocumentNo(), movement.get_TrxName());
 
-			if (movement.get_Value("SRI_Authorization_ID") == null)
+			if (movement.get_Value("SRI_Authorization_ID") == null) {
 				movement.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+				movement.saveEx();
+			}
 
 		}
 
