@@ -25,6 +25,5 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/jdom-2.0.5/jdom-2.0.5.jar"/>
 	<classpathentry kind="lib" path="lib/org.apache.karaf.specs.java.xml.ws-4.2.7.jar"/>
-	<classpathentry kind="lib" path="/home/lperez/Workspace/sources/Asistanet/fe-ec/lib/jaxws-api-2.1-1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
