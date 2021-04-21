@@ -58,30 +58,24 @@ public class SendAuthorizationSRI extends SvrProcess {
 			if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Invoice)) {
 				LEC_FE_MInvoice lecfeinv = new LEC_FE_MInvoice(getCtx(), record_id, get_TrxName());
 				msg = lecfeinv.lecfeinv_SriExportInvoiceXML100();
-				counter(msg, count);
 			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_PurchaseLiquidation)) {
 				LEC_FE_MInvoicePL lecfeinvpl = new LEC_FE_MInvoicePL(getCtx(), record_id, get_TrxName());
 				msg = lecfeinvpl.lecfeinv_SriExportInvoicePLXML100();
-				counter(msg, count);
 			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_CreditMemo)) {
 				LEC_FE_MNotaCredito lecfeinvnc = new LEC_FE_MNotaCredito(getCtx(), record_id, get_TrxName());
 				msg = lecfeinvnc.lecfeinvnc_SriExportNotaCreditoXML100();
-				counter(msg, count);
 			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_DebitMemo)) {
 				LEC_FE_MNotaDebito lecfeinvnd = new LEC_FE_MNotaDebito(getCtx(), record_id, get_TrxName());
 				msg = lecfeinvnd.lecfeinvnd_SriExportNotaDebitoXML100();
-				counter(msg, count);
 			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Shipment)) {
 				LEC_FE_MInOut lecfeinout = new LEC_FE_MInOut(getCtx(), record_id, get_TrxName());
-				msg = lecfeinout.lecfeinout_SriExportInOutXML100();	
-				counter(msg, count);
+				msg = lecfeinout.lecfeinout_SriExportInOutXML100();
 			} else if (auth.getSRI_ShortDocType().equals(X_SRI_Authorization.SRI_SHORTDOCTYPE_Withholding)) {
 				LEC_FE_MRetencion lecfeinvret = new LEC_FE_MRetencion(getCtx(), record_id, get_TrxName());
 				if (new BigDecimal(lecfeinvret.get_ValueAsString("WithholdingAmt")).signum() > 0) {
 					LEC_FE_MRetencion.generateWitholdingNo(lecfeinvret);					
 				}
 				msg = lecfeinvret.lecfeinvret_SriExportRetencionXML100();
-				counter(msg, count);
 			}
 			
 			if (msg == null)
@@ -89,10 +83,5 @@ public class SendAuthorizationSRI extends SvrProcess {
 		}
 
 		return "Procesados: "+count;
-	}
-	
-	private void counter(String msg, int count) {
-		if (msg == null)
-			count++;
 	}
 }
