@@ -232,7 +232,7 @@ public class LEC_FE_Movement extends MMovement {
 			OutputStream mmDocStream = null;
 
 			String xmlFileName = "SRI_" + m_coddoc + "-" + LEC_FE_Utils.getDate(getMovementDate(), 9) + "-"
-					+ m_accesscode + ".xml";
+					+ ac.getValue() + ".xml";
 
 			// ruta completa del archivo xml
 			file_name = signature.getFolderRaiz() + File.separator + LEC_FE_UtilsXml.folderComprobantesGenerados

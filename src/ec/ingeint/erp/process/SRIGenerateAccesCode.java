@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.compiere.model.MDocType;
+import org.compiere.model.MInOut;
 import org.compiere.model.MInvoice;
 import org.compiere.model.Query;
 import org.compiere.process.ProcessInfoParameter;
@@ -40,6 +41,7 @@ public class SRIGenerateAccesCode extends SvrProcess {
 		int total = 0;
 		String seq = "";
 
+		//Invoices
 		List<MInvoice> invoices = new Query(getCtx(), MInvoice.Table_Name, where, get_TrxName()).list();
 
 		total = invoices.size();
@@ -62,7 +64,27 @@ public class SRIGenerateAccesCode extends SvrProcess {
 			invoice.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
 			invoice.saveEx();
 		}
-
+		
+		//Shipments
+		List<MInOut> inouts = new Query(getCtx(), MInOut.Table_Name, where, get_TrxName()).list();
+		
+		for (MInOut inout : inouts) {
+			
+			log.warning("Por Procesar: " + String.valueOf(total = total - 1));
+			log.warning("Entrega a procesar: " + inout.getDocumentNo());
+			MDocType dt = new MDocType(getCtx(), inout.getC_DocType_ID(), get_TrxName());
+			String DocTypeSri = dt.get_ValueAsString("SRI_ShortDocType");
+			
+			X_SRI_Authorization auth = LEC_FE_CreateAccessCode.CreateAccessCode(getCtx(),
+					MInOut.COLUMNNAME_M_InOut_ID, inout.getAD_Org_ID(), inout.getCreatedBy(),
+					inout.getM_InOut_ID(), DocTypeSri, inout.getMovementDate(), inout.getDocumentNo(),
+					get_TrxName());
+			
+			inout.set_ValueOfColumn("SRI_Authorization_ID", auth.getSRI_Authorization_ID());
+			inout.saveEx();
+		}
+		
+		//Withholding
 		where = "sri_authorization_id Is Null and issriofflineschema = 'Y' AND IssoTrx= 'N' ";
 
 		invoices = new Query(getCtx(), MInvoice.Table_Name, where, get_TrxName()).list();
