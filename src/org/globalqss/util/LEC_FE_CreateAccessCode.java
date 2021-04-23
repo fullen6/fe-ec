@@ -69,6 +69,9 @@ public class LEC_FE_CreateAccessCode {
 				LEC_FE_Utils.getOrgCode(LEC_FE_Utils.formatDocNo(DocumentNo, m_coddoc)),
 				LEC_FE_Utils.getStoreCode(LEC_FE_Utils.formatDocNo(DocumentNo, m_coddoc)), DocumentNo,
 				oi.get_ValueAsString("SRI_DocumentCode"), signature.getDeliveredType(), ac);
+		
+		if (m_accesscode.equals("errorInAccessCode"))
+			return null;
 
 		if (signature.getCodeAccessType().equals(LEC_FE_UtilsXml.claveAccesoAutomatica))
 			ac.setValue(m_accesscode);

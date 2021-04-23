@@ -75,7 +75,8 @@ public class LEC_FE_MInOut extends MInOut {
 	public String lecfeinout_SriExportInOutXML100() {
 		String msgStatus = "";
 		MInOut inout = new MInOut(getCtx(), getM_InOut_ID(), get_TrxName());
-		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), inout.get_ValueAsInt("SRI_Authorization_ID"), get_TrxName());
+		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), inout.get_ValueAsInt("SRI_Authorization_ID"),
+				get_TrxName());
 		String msg = null;
 		String ErrorDocumentno = "Error en Entrega a Cliente No " + getDocumentNo() + " ";
 
@@ -213,7 +214,7 @@ public class LEC_FE_MInOut extends MInOut {
 				return ErrorDocumentno + "Debe indicar fechas de transporte";
 
 			msgStatus = "AccessCode";
-			
+
 			X_SRI_AccessCode ac = null;
 			ac = new X_SRI_AccessCode(getCtx(), a.getSRI_AccessCode_ID(), get_TrxName());
 
@@ -449,26 +450,22 @@ public class LEC_FE_MInOut extends MInOut {
 				msg = signature.respuestaRecepcionComprobante(file_name);
 
 				if (msg != null)
-
-					if (msg.contains("ERROR-65"))
+					if (msg.contains("ERROR-65")) {
 						DB.executeUpdateEx(
-								"UPDATE C_Invoice set issri_error = 'Y', SRI_ErrorInfo = ? WHERE C_Invoice_ID = ? ",
-								new Object[] { msg, getC_Invoice_ID() }, get_TrxName());
-					else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
+								"UPDATE M_InOut set issri_error = 'Y', SRI_ErrorInfo = ? WHERE M_InOut_ID = ? ",
+								new Object[] { msg, getM_InOut_ID() }, get_TrxName());
+					} else if (msg.contains("DEVUELTA-ERROR-43-CLAVE") || msg.contains("DEVUELTA-ERROR-45")) {
 						a.set_ValueOfColumn("IsToSend", false);
 						a.saveEx();
 						msg = null;
 						this.saveEx();
 						return ErrorDocumentno + msg;
+					} else if (!msg.equals("RECIBIDA")) {
+						a.set_ValueOfColumn("issri_error", true);
+						a.set_ValueOfColumn("IsToSend", false);
+						a.saveEx();
+						return ErrorDocumentno + msg;
 					}
-
-				if (!msg.equals("RECIBIDA")) {
-					
-					a.set_ValueOfColumn("issri_error", true);
-					a.set_ValueOfColumn("IsToSend", false);
-					a.saveEx();
-					return ErrorDocumentno + msg;
-				} 
 
 				// 04/07/2016 MHG Offline Schema added
 				if (!isOfflineSchema) {
@@ -537,7 +534,7 @@ public class LEC_FE_MInOut extends MInOut {
 
 	public MNote notifyError(String msg) {
 		Integer exist = DB.getSQLValue(get_TrxName(),
-				"SELECT Record_id FROM AD_Note WHERE AD_Table_ID = 319 AND Record_ID=? ", get_ID());
+				"SELECT Record_ID FROM AD_Note WHERE AD_Table_ID = 319 AND Record_ID = ? ", get_ID());
 		if (exist <= 0) {
 			MNote note = new MNote(getCtx(), 0, null);
 			note.setAD_Table_ID(319);

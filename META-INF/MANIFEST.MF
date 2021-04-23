@@ -23,7 +23,8 @@ Require-Bundle: org.adempiere.base;bundle-version="7.1.0",
  org.eclipse.osgi
 Service-Component: OSGI-INF/LEC_FE_ModelFactory.xml,OSGI-INF/LEC_FE_ModelValidator.xml,OSGI-INF/LEC_FE_ProcessFactory.xml,
  OSGI-INF/LEC_FE_CalloutFactory.xml
-Import-Package: javax.xml.bind,
+Import-Package: com.google.common.base,
+ javax.xml.bind,
  javax.xml.bind.annotation,
  javax.xml.ws,
  org.apache.commons.io;version="2.2.0",

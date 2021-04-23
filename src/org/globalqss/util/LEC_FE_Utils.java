@@ -514,11 +514,10 @@ public class LEC_FE_Utils {
 			}
 
 			accesscode = accesscode + String.format("%1s", tipoemision);// tipoEmision
-
 			accesscode = accesscode + String.format("%1s", calculateDigitSri(accesscode)); // digito
 
 		} catch (Exception e) {
-			throw new AdempiereException(Msg.getMsg(Env.getCtx(), "LCO_NotANumber")+"Documento: "+documentno);
+			return "errorInAccessCode";
 		}
 
 		return accesscode;

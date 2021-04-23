@@ -454,6 +454,7 @@ public class LEC_FE_Movement extends MMovement {
 						String invoiceID = String.valueOf(get_ID());
 						a.setDescription(invoiceNo + "-Movimiento");
 						a.set_ValueOfColumn("DocumentID", invoiceID);
+						a.setistosend(false);
 						a.saveEx();
 					}
 
@@ -526,6 +527,8 @@ public class LEC_FE_Movement extends MMovement {
 		log.warning("@SRI_FileGenerated@ -> " + file_name);
 		set_Value("SRI_Authorization_ID", autorizationID);
 		this.saveEx();
+		a.setistosend(false);
+		a.saveEx();
 		return msg;
 
 	} // lecfeMovement_SriExportMovementXML100
