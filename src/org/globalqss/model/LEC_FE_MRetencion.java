@@ -83,7 +83,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 		LEC_FE_MRetencion wh = new LEC_FE_MRetencion(getCtx(), getC_Invoice_ID(), get_TrxName());
 		X_SRI_Authorization a = new X_SRI_Authorization(getCtx(), wh.get_ValueAsInt("SRI_Authorization_ID"),
 				get_TrxName());
-
+		
 		String msg = null;
 		String ErrorDocumentno = "Error en Retención No " + getDocumentNo() + " ";
 
@@ -489,11 +489,7 @@ public class LEC_FE_MRetencion extends MInvoice {
 					LEC_FE_Utils.attachXmlFile(a.getCtx(), a.get_TrxName(), a.getSRI_Authorization_ID(), file_name);
 
 			}
-
-			// if (LEC_FE_Utils.breakDialog("Completando Retencion")) return "Cancelado...";
-			// // TODO Temp
-
-			//
+		  //
 		} catch (Exception e) {
 			msg = "No se pudo crear XML - " + msgStatus + " - " + e.getMessage();
 			// log.severe(msg);
